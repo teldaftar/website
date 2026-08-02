@@ -1,12 +1,15 @@
-import { toValue, type MaybeRefOrGetter } from 'vue'
+import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { salesApi } from '@/api/sales'
 import { usePaginatedList } from './usePaginatedList'
 import type {
   CreateAccessorySalePayload,
   CreatePhoneSalePayload,
+  Phone,
   ReturnPayload,
+  Sale,
   SaleListQuery,
+  SaleType,
 } from '@/api/types'
 
 export function useSalesList(filters: MaybeRefOrGetter<SaleListQuery>) {
@@ -27,9 +30,53 @@ export function useSaleReturns(id: MaybeRefOrGetter<string>) {
   })
 }
 
+/** Fetch every sale of a given type, paginating through all pages. */
+async function fetchAllSales(type: SaleType): Promise<Sale[]> {
+  const first = await salesApi.list({ type, page: 1, limit: 100 })
+  const all = [...first.data]
+  for (let page = 2; page <= first.meta.totalPages; page++) {
+    const res = await salesApi.list({ type, page, limit: 100 })
+    all.push(...res.data)
+  }
+  return all
+}
+
+/**
+ * The sale a sold phone belongs to, so it can be returned from the phone page.
+ * The backend exposes no phone→sale link, so we scan phone sales and match by
+ * the product snapshot id (a phone sale has exactly one item).
+ */
+export function usePhoneSale(phone: MaybeRefOrGetter<Phone | null | undefined>) {
+  return useQuery({
+    queryKey: ['sales-full', 'PHONE'],
+    enabled: computed(() => toValue(phone)?.status === 'SOLD'),
+    queryFn: () => fetchAllSales('PHONE'),
+    select: (sales): Sale | null => {
+      const p = toValue(phone)
+      if (!p) return null
+      return sales.find((s) => s.items.some((it) => it.product.id === p.id)) ?? null
+    },
+  })
+}
+
+/** All sales that include a given accessory, so each can be returned from the sold sheet. */
+export function useAccessorySales(accessoryId: MaybeRefOrGetter<string | null | undefined>) {
+  return useQuery({
+    queryKey: ['sales-full', 'ACCESSORY'],
+    enabled: computed(() => !!toValue(accessoryId)),
+    queryFn: () => fetchAllSales('ACCESSORY'),
+    select: (sales): Sale[] => {
+      const aid = toValue(accessoryId)
+      if (!aid) return []
+      return sales.filter((s) => s.items.some((it) => it.product.id === aid))
+    },
+  })
+}
+
 /** Invalidate everything a sale touches: sales, phones/accessories stock, debts, stats. */
 function invalidateAfterSale(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: ['sales'] })
+  qc.invalidateQueries({ queryKey: ['sales-full'] })
   qc.invalidateQueries({ queryKey: ['phones'] })
   qc.invalidateQueries({ queryKey: ['phone'] })
   qc.invalidateQueries({ queryKey: ['accessories'] })

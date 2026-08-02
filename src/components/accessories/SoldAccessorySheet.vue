@@ -1,18 +1,40 @@
 <script setup lang="ts">
-import { toRef } from 'vue'
-import { Headphones } from 'lucide-vue-next'
+import { computed, ref, toRef } from 'vue'
+import { Headphones, Undo2 } from 'lucide-vue-next'
+import type { Sale } from '@/api/types'
 import { useSoldAccessory } from '@/composables/useAccessories'
-import { formatMoney, formatNumber, resolveImageUrl } from '@/lib/format'
+import { useAccessorySales } from '@/composables/useSales'
+import { formatMoney, formatNumber, formatDateTime, resolveImageUrl } from '@/lib/format'
 import { toUserMessage } from '@/api/errors'
 import { t } from '@/i18n'
 import ModalSheet from '@/components/ui/ModalSheet.vue'
 import DataState from '@/components/ui/DataState.vue'
 import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
+import AppButton from '@/components/ui/AppButton.vue'
+import ReturnSheet from '@/components/sales/ReturnSheet.vue'
 
 const props = defineProps<{ accessoryId: string }>()
 const open = defineModel<boolean>({ required: true })
 
 const { data, isLoading, isError, error, refetch } = useSoldAccessory(toRef(props, 'accessoryId'))
+
+// Each sale that includes this accessory — so it can be returned right here.
+const { data: sales } = useAccessorySales(toRef(props, 'accessoryId'))
+const saleRows = computed(() =>
+  (sales.value ?? [])
+    .map((sale) => {
+      const item = sale.items.find((i) => i.product.id === props.accessoryId)
+      return item ? { sale, item, returnable: item.quantity - item.returnedQuantity > 0 } : null
+    })
+    .filter((r): r is { sale: Sale; item: Sale['items'][number]; returnable: boolean } => r !== null),
+)
+
+const selectedSale = ref<Sale | null>(null)
+const showReturn = ref(false)
+function openReturn(sale: Sale) {
+  selectedSale.value = sale
+  showReturn.value = true
+}
 </script>
 
 <template>
@@ -72,34 +94,47 @@ const { data, isLoading, isError, error, refetch } = useSoldAccessory(toRef(prop
           </div>
         </div>
 
-        <!-- Price breakdown -->
+        <!-- Sales — return each one individually -->
         <div>
           <h3 class="mb-2 px-1 text-sm font-semibold text-fg-muted">
-            {{ t('accessories.breakdown') }}
+            {{ t('returns.salesList') }}
           </h3>
-          <div class="overflow-hidden rounded-2xl border border-border">
+          <div v-if="saleRows.length" class="overflow-hidden rounded-2xl border border-border">
             <div
-              v-for="(line, i) in data.lines"
-              :key="i"
+              v-for="(row, i) in saleRows"
+              :key="row.sale.id"
               class="flex items-center justify-between gap-3 px-4 py-3"
               :class="i > 0 ? 'border-t border-border' : ''"
             >
               <div class="min-w-0">
-                <p class="font-semibold text-fg tnum">
-                  {{ formatMoney(line.unitPrice) }} × {{ formatNumber(line.quantity) }}
-                </p>
+                <p class="font-semibold text-fg tnum">{{ row.sale.code }}</p>
                 <p class="text-xs text-fg-muted tnum">
-                  {{ t('accessories.soldCost') }}: {{ formatMoney(line.costPrice) }}
+                  {{ formatNumber(row.item.quantity) }} × {{ formatMoney(row.item.unitPrice) }}
+                  <span v-if="row.item.returnedQuantity > 0" class="text-danger">
+                    · {{ t('sales.returnedQty') }}: {{ row.item.returnedQuantity }}
+                  </span>
                 </p>
+                <p class="text-xs text-fg-muted">{{ formatDateTime(row.sale.soldAt) }}</p>
               </div>
-              <div class="shrink-0 text-right">
-                <p class="font-bold text-fg tnum">{{ formatMoney(line.amount) }}</p>
-                <p class="text-xs font-medium text-success tnum">+{{ formatMoney(line.profit) }}</p>
-              </div>
+              <AppButton
+                v-if="row.returnable"
+                size="sm"
+                variant="secondary"
+                @click="openReturn(row.sale)"
+              >
+                <template #icon><Undo2 class="size-4" /></template>
+                {{ t('returns.action') }}
+              </AppButton>
+              <span v-else class="shrink-0 text-xs font-medium text-fg-muted">
+                {{ t('returns.fullyReturned') }}
+              </span>
             </div>
           </div>
+          <p v-else class="px-1 text-sm text-fg-muted">{{ t('returns.noSales') }}</p>
         </div>
       </div>
     </DataState>
   </ModalSheet>
+
+  <ReturnSheet v-if="selectedSale" v-model="showReturn" :sale="selectedSale" />
 </template>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Smartphone, Pencil, Trash2, Tag, ShoppingCart } from 'lucide-vue-next'
+import { Smartphone, Pencil, Trash2, Tag, ShoppingCart, Undo2 } from 'lucide-vue-next'
 import { usePhone, useDeletePhone } from '@/composables/usePhones'
+import { usePhoneSale } from '@/composables/useSales'
 import { formatMoney, formatMemory, formatDateTime, resolveImageUrl } from '@/lib/format'
 import { phoneCondition, phoneStatus } from '@/lib/labels'
 import { toUserMessage } from '@/api/errors'
@@ -18,6 +19,7 @@ import AppButton from '@/components/ui/AppButton.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import PhoneFormSheet from '@/components/phones/PhoneFormSheet.vue'
 import SaleSheet from '@/components/sales/SaleSheet.vue'
+import ReturnSheet from '@/components/sales/ReturnSheet.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -25,6 +27,17 @@ const id = computed(() => String(route.params.id))
 
 const { data: phone, isLoading, isError, error, refetch } = usePhone(id)
 const deletePhone = useDeletePhone()
+
+// The sale this phone belongs to, so a sold phone can be returned from here.
+const { data: phoneSale } = usePhoneSale(phone)
+const returnableSale = computed(() => {
+  const s = phoneSale.value
+  if (!s || !phone.value) return null
+  const hasReturnable = s.items.some(
+    (it) => it.product.id === phone.value!.id && it.quantity - it.returnedQuantity > 0,
+  )
+  return hasReturnable ? s : null
+})
 
 const inStock = computed(() => phone.value?.status === 'IN_STOCK')
 const memory = computed(() =>
@@ -34,6 +47,7 @@ const memory = computed(() =>
 const showEdit = ref(false)
 const showDelete = ref(false)
 const showSale = ref(false)
+const showReturn = ref(false)
 
 async function onDelete() {
   if (!phone.value) return
@@ -174,6 +188,16 @@ function sell() {
             </AppButton>
 
             <AppButton
+              v-if="returnableSale"
+              variant="secondary"
+              class="col-span-2"
+              @click="showReturn = true"
+            >
+              <template #icon><Undo2 class="size-4" /></template>
+              {{ t('returns.action') }}
+            </AppButton>
+
+            <AppButton
               v-if="inStock"
               variant="danger"
               class="col-span-2"
@@ -189,6 +213,7 @@ function sell() {
 
     <PhoneFormSheet v-if="phone" v-model="showEdit" :phone="phone" />
     <SaleSheet v-if="phone" v-model="showSale" :phone="phone" />
+    <ReturnSheet v-if="returnableSale" v-model="showReturn" :sale="returnableSale" />
     <ConfirmDialog
       v-model="showDelete"
       :title="t('phones.deleteConfirm')"

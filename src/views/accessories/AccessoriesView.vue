@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus, Headphones, Check } from 'lucide-vue-next'
+import { Plus, Headphones } from 'lucide-vue-next'
 import type { Accessory, AccessoryListQuery, SoldAccessoryListQuery } from '@/api/types'
 import {
   useAccessoriesList,
@@ -37,12 +37,11 @@ const modeOptions = [
   { label: t('accessories.tabSold'), value: 'sold' as const },
 ]
 
-const filters = reactive<{ search: string; inStock: boolean }>({ search: '', inStock: false })
+const filters = reactive<{ search: string }>({ search: '' })
 
 // --- Current (in-stock) list ---
 const currentQuery = computed<AccessoryListQuery>(() => ({
   search: filters.search.trim() || undefined,
-  inStock: filters.inStock || undefined,
 }))
 const current = useAccessoriesList(currentQuery)
 
@@ -119,20 +118,6 @@ async function confirmDelete() {
       <div class="space-y-3">
         <Segmented v-model="mode" :options="modeOptions" />
         <SearchBar v-model="filters.search" />
-        <button
-          v-if="mode === 'current'"
-          type="button"
-          class="inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors"
-          :class="
-            filters.inStock
-              ? 'border-primary bg-primary text-primary-fg'
-              : 'border-border bg-surface text-fg-muted hover:text-fg'
-          "
-          @click="filters.inStock = !filters.inStock"
-        >
-          <Check v-if="filters.inStock" class="size-4" />
-          {{ t('accessories.onlyInStock') }}
-        </button>
       </div>
 
       <!-- Current (in-stock) -->
