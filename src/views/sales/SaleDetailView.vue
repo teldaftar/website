@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { Smartphone, Headphones, Undo2, User } from 'lucide-vue-next'
+import { Smartphone, Headphones, Undo2 } from 'lucide-vue-next'
 import { useSale, useSaleReturns } from '@/composables/useSales'
-import { formatMoney, formatDateTime, formatDate, formatPhone } from '@/lib/format'
+import { formatMoney, formatDateTime, formatDate } from '@/lib/format'
 import { saleStatus } from '@/lib/labels'
 import { toUserMessage } from '@/api/errors'
 import { t } from '@/i18n'
@@ -15,6 +15,8 @@ import Card from '@/components/ui/Card.vue'
 import Badge from '@/components/ui/Badge.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import ReturnSheet from '@/components/sales/ReturnSheet.vue'
+import DebtDetailCard from '@/components/debts/DebtDetailCard.vue'
+import PayDebtSheet from '@/components/debts/PayDebtSheet.vue'
 
 const route = useRoute()
 const id = computed(() => String(route.params.id))
@@ -23,10 +25,13 @@ const { data: sale, isLoading, isError, error, refetch } = useSale(id)
 const { data: returns } = useSaleReturns(id)
 
 const showReturn = ref(false)
+const showPay = ref(false)
 
 const canReturn = computed(
   () => !!sale.value && sale.value.items.some((i) => i.quantity - i.returnedQuantity > 0),
 )
+/** Remaining debt on this sale (falls back to the initial debt if `debt` is absent). */
+const remainingDebt = computed(() => sale.value?.debt?.amount ?? sale.value?.debtAmount ?? 0)
 </script>
 
 <template>
@@ -73,10 +78,10 @@ const canReturn = computed(
                 <p class="text-fg-muted">{{ t('sales.paid') }}</p>
                 <p class="mt-0.5 font-semibold text-fg tnum">{{ formatMoney(sale.paidAmount) }}</p>
               </div>
-              <div v-if="sale.debtAmount > 0" class="rounded-xl bg-warning-soft p-3">
-                <p class="text-warning">{{ t('debts.owed') }}</p>
+              <div v-if="remainingDebt > 0" class="rounded-xl bg-warning-soft p-3">
+                <p class="text-warning">{{ t('debts.remaining') }}</p>
                 <p class="mt-0.5 font-semibold text-warning tnum">
-                  {{ formatMoney(sale.debtAmount) }}
+                  {{ formatMoney(remainingDebt) }}
                 </p>
               </div>
             </div>
@@ -118,25 +123,7 @@ const canReturn = computed(
           <!-- Debt block -->
           <div v-if="sale.debt">
             <h3 class="mb-2 px-1 text-sm font-semibold text-fg-muted">{{ t('nav.debts') }}</h3>
-            <Card>
-              <div class="flex items-center gap-3">
-                <div
-                  class="grid size-10 place-items-center rounded-full bg-surface-2 text-fg-muted"
-                >
-                  <User class="size-5" />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="font-medium text-fg">{{ sale.debt.customerName }}</p>
-                  <a :href="`tel:${sale.debt.customerPhone}`" class="text-sm text-primary">{{
-                    formatPhone(sale.debt.customerPhone)
-                  }}</a>
-                </div>
-                <div class="text-right">
-                  <p class="font-bold text-warning tnum">{{ formatMoney(sale.debt.amount) }}</p>
-                  <p class="text-xs text-fg-muted">{{ formatDate(sale.debt.dueDate) }}</p>
-                </div>
-              </div>
-            </Card>
+            <DebtDetailCard :debt="sale.debt" @pay="showPay = true" />
           </div>
 
           <!-- Returns list -->
@@ -176,5 +163,6 @@ const canReturn = computed(
     </PageContainer>
 
     <ReturnSheet v-if="sale" v-model="showReturn" :sale="sale" />
+    <PayDebtSheet v-if="sale?.debt" v-model="showPay" :debt="sale.debt" @paid="refetch" />
   </div>
 </template>

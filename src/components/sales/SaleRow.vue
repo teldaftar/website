@@ -20,6 +20,8 @@ const subtitle = computed(() => {
   return p.memory || p.imei || ''
 })
 const status = computed(() => saleStatus(props.sale.status))
+/** Remaining debt (falls back to the initial amount if `debt` isn't embedded). */
+const remainingDebt = computed(() => props.sale.debt?.amount ?? props.sale.debtAmount)
 </script>
 
 <template>
@@ -51,8 +53,8 @@ const status = computed(() => saleStatus(props.sale.status))
 
     <div class="mt-2 flex flex-wrap items-center gap-1.5">
       <Badge :tone="status.tone">{{ status.label }}</Badge>
-      <Badge v-if="sale.debtAmount > 0" tone="warning">
-        {{ t('debts.owed') }}: {{ formatMoney(sale.debtAmount) }}
+      <Badge v-if="remainingDebt > 0" tone="warning">
+        {{ t('debts.owed') }}: {{ formatMoney(remainingDebt) }}
       </Badge>
       <Badge v-if="sale.profit != null" tone="success">
         {{ t('sales.profit') }}: {{ formatMoney(sale.profit) }}

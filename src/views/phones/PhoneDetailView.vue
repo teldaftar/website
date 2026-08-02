@@ -20,6 +20,8 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import PhoneFormSheet from '@/components/phones/PhoneFormSheet.vue'
 import SaleSheet from '@/components/sales/SaleSheet.vue'
 import ReturnSheet from '@/components/sales/ReturnSheet.vue'
+import DebtDetailCard from '@/components/debts/DebtDetailCard.vue'
+import PayDebtSheet from '@/components/debts/PayDebtSheet.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -48,6 +50,7 @@ const showEdit = ref(false)
 const showDelete = ref(false)
 const showSale = ref(false)
 const showReturn = ref(false)
+const showPay = ref(false)
 
 async function onDelete() {
   if (!phone.value) return
@@ -167,6 +170,12 @@ function sell() {
             </div>
           </Card>
 
+          <!-- Debt block -->
+          <div v-if="phone.debt">
+            <h3 class="mb-2 px-1 text-sm font-semibold text-fg-muted">{{ t('nav.debts') }}</h3>
+            <DebtDetailCard :debt="phone.debt" @pay="showPay = true" />
+          </div>
+
           <!-- Actions -->
           <div class="grid grid-cols-2 gap-3">
             <AppButton v-if="inStock" size="lg" class="col-span-2" @click="sell">
@@ -214,6 +223,7 @@ function sell() {
     <PhoneFormSheet v-if="phone" v-model="showEdit" :phone="phone" />
     <SaleSheet v-if="phone" v-model="showSale" :phone="phone" />
     <ReturnSheet v-if="returnableSale" v-model="showReturn" :sale="returnableSale" />
+    <PayDebtSheet v-if="phone?.debt" v-model="showPay" :debt="phone.debt" @paid="refetch" />
     <ConfirmDialog
       v-model="showDelete"
       :title="t('phones.deleteConfirm')"

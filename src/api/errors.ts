@@ -7,6 +7,7 @@ const DETAIL_CODES = new Set([
   'INSUFFICIENT_STOCK',
   'RETURN_EXCEEDS_SOLD',
   'RETURN_AMOUNT_EXCEEDS_SOLD',
+  'PAYMENT_EXCEEDS_REMAINING',
 ])
 
 /** Normalise anything thrown by axios / the app into the backend's error shape. */

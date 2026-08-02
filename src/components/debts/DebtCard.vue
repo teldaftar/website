@@ -13,6 +13,9 @@ defineEmits<{ pay: []; extend: []; openSale: [] }>()
 
 const status = computed(() => debtStatus(props.debt.status))
 const isOpen = computed(() => props.debt.status === 'OPEN')
+/** Original debt = still owed + already paid against it. */
+const totalDebt = computed(() => props.debt.amount + props.debt.paidTotal)
+const hasPartialPayment = computed(() => props.debt.paidTotal > 0)
 </script>
 
 <template>
@@ -48,13 +51,27 @@ const isOpen = computed(() => props.debt.status === 'OPEN')
         </button>
       </div>
       <div class="text-right">
-        <p class="text-xs text-fg-muted">{{ t('debts.owed') }}</p>
+        <p class="text-xs text-fg-muted">{{ hasPartialPayment ? t('debts.remaining') : t('debts.owed') }}</p>
         <p class="text-lg font-bold text-fg tnum" :class="debt.isOverdue ? 'text-danger' : ''">
           {{ formatMoney(debt.amount) }}
         </p>
         <p class="text-xs text-fg-muted">
           <CalendarClock class="mr-0.5 inline size-3" />{{ formatDate(debt.dueDate) }}
         </p>
+      </div>
+    </div>
+
+    <div
+      v-if="hasPartialPayment"
+      class="mt-3 flex items-center justify-between gap-2 rounded-xl bg-surface-2 px-3 py-2 text-xs"
+    >
+      <div>
+        <span class="text-fg-muted">{{ t('debts.totalDebt') }}: </span>
+        <span class="font-semibold text-fg tnum">{{ formatMoney(totalDebt) }}</span>
+      </div>
+      <div>
+        <span class="text-fg-muted">{{ t('debts.paid') }}: </span>
+        <span class="font-semibold text-success tnum">{{ formatMoney(debt.paidTotal) }}</span>
       </div>
     </div>
 

@@ -34,6 +34,7 @@ const props = defineProps<{ daily: DailyStat[] }>()
 // Brand colours that read well in both light and dark themes.
 const SALES = '#6366f1'
 const PROFIT = '#22c55e'
+const DEBT = '#f59e0b'
 
 const data = computed<ChartData<'line'>>(() => ({
   labels: props.daily.map((d) => formatDate(d.date).slice(0, 5)),
@@ -57,6 +58,18 @@ const data = computed<ChartData<'line'>>(() => ({
       fill: false,
       tension: 0.35,
       borderWidth: 2,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+    },
+    {
+      label: t('dashboard.chartDebt'),
+      data: props.daily.map((d) => d.debtCollected),
+      borderColor: DEBT,
+      backgroundColor: 'transparent',
+      fill: false,
+      tension: 0.35,
+      borderWidth: 2,
+      borderDash: [4, 3],
       pointRadius: 0,
       pointHoverRadius: 4,
     },

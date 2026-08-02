@@ -43,19 +43,27 @@ const inStock = computed(() => props.phone.status === 'IN_STOCK')
           <Badge v-if="condition" :tone="condition.tone">{{ condition.label }}</Badge>
         </div>
         <!-- Sold: olingan / sotilgan / foyda side by side -->
-        <div v-else class="mt-1.5 grid grid-cols-3 gap-1 text-[11px] leading-tight">
-          <div>
-            <p class="text-fg-muted">{{ t('phones.bought') }}</p>
-            <p class="font-bold text-fg tnum">{{ formatMoney(phone.purchasePrice) }}</p>
+        <div v-else>
+          <div class="mt-1.5 grid grid-cols-3 gap-1 text-[11px] leading-tight">
+            <div>
+              <p class="text-fg-muted">{{ t('phones.bought') }}</p>
+              <p class="font-bold text-fg tnum">{{ formatMoney(phone.purchasePrice) }}</p>
+            </div>
+            <div>
+              <p class="text-fg-muted">{{ t('phones.soldFor') }}</p>
+              <p class="font-bold text-fg tnum">{{ formatMoney(phone.salePrice) }}</p>
+            </div>
+            <div>
+              <p class="text-fg-muted">{{ t('sales.profit') }}</p>
+              <p class="font-bold text-success tnum">{{ formatMoney(phone.profit) }}</p>
+            </div>
           </div>
-          <div>
-            <p class="text-fg-muted">{{ t('phones.soldFor') }}</p>
-            <p class="font-bold text-fg tnum">{{ formatMoney(phone.salePrice) }}</p>
-          </div>
-          <div>
-            <p class="text-fg-muted">{{ t('sales.profit') }}</p>
-            <p class="font-bold text-success tnum">{{ formatMoney(phone.profit) }}</p>
-          </div>
+          <p
+            v-if="phone.debt && phone.debt.amount > 0"
+            class="mt-1.5 text-[11px] font-semibold text-warning"
+          >
+            {{ t('debts.owed') }}: {{ formatMoney(phone.debt.amount) }}
+          </p>
         </div>
       </div>
     </button>

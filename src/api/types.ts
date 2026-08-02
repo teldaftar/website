@@ -113,6 +113,8 @@ export interface Phone {
   note?: string | null
   imageUrl?: string | null
   status: PhoneStatus
+  /** Present when the phone was sold on debt (null for a cash sale). */
+  debt?: EmbeddedDebt | null
   createdAt: string
   updatedAt: string
 }
@@ -263,16 +265,34 @@ export interface DebtInput {
   customerPhone: string
 }
 
-/** Per-sale debt summary embedded in SaleResponse (SaleDebtSummaryDto). */
-export interface SaleDebtSummary {
+/** A payment as embedded in a sale/phone debt object (lighter than DebtPayment). */
+export interface EmbeddedDebtPayment {
+  amount: number
+  paidAt: string
+  note?: string | null
+}
+
+/**
+ * Debt object embedded in a sale (SaleResponse) or sold phone (PhoneResponse) —
+ * the same shape in both places. `payments` is populated on the detail endpoints;
+ * list endpoints may omit it (only `amount`, the remaining, is needed there).
+ */
+export interface EmbeddedDebt {
   id: string
+  saleId: string
   customerName: string
   customerPhone: string
+  /** Debt amount at sale time, before any payments. */
+  originalAmount: number
+  /** Amount still owed (remaining). */
   amount: number
+  /** Sum of all payments made against this debt. */
+  paidTotal: number
   dueDate: string
   status: DebtStatus
   isOverdue: boolean
   daysOverdue: number
+  payments?: EmbeddedDebtPayment[]
 }
 
 /** Product snapshot embedded in each sale item. */
@@ -307,7 +327,7 @@ export interface Sale {
   soldAt: string
   profit: number
   items: SaleItem[]
-  debt?: SaleDebtSummary | null
+  debt?: EmbeddedDebt | null
 }
 
 export interface SaleListQuery {
@@ -366,14 +386,26 @@ export interface Debt {
   productName: string
   saleTotalAmount: number
   paidAmount: number
-  /** Amount still owed. */
+  /** Amount still owed (outstanding); decreases as payments are made. */
   amount: number
+  /** Sum of all payments made against this debt. */
+  paidTotal: number
   dueDate: string
   status: DebtStatus
   paidAt?: string | null
   note?: string | null
   isOverdue: boolean
   daysOverdue: number
+  createdAt: string
+}
+
+/** A single payment recorded against a debt (GET /debts/:id/payments). */
+export interface DebtPayment {
+  id: string
+  debtId: string
+  amount: number
+  paidAt: string
+  note?: string | null
   createdAt: string
 }
 
@@ -388,7 +420,10 @@ export interface DebtListQuery {
 }
 
 export interface PayDebtPayload {
+  /** Amount to pay now; must not exceed the outstanding remaining. */
+  amount: number
   paidAt?: string
+  note?: string
 }
 
 export interface UpdateDebtPayload {

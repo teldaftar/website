@@ -10,6 +10,7 @@ import {
   Headphones,
   ChevronRight,
   AlertTriangle,
+  HandCoins,
 } from 'lucide-vue-next'
 import { useStatisticsSummary, useDailyStats } from '@/composables/useStatistics'
 import { toUserMessage } from '@/api/errors'
@@ -157,6 +158,17 @@ function refresh() {
                   <span class="flex items-center gap-1 text-xs text-primary">
                     {{ t('dashboard.viewDebtors') }} <ChevronRight class="size-4" />
                   </span>
+                </div>
+                <div class="mt-3 flex items-center gap-3 rounded-xl bg-success-soft p-3">
+                  <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-success/15 text-success">
+                    <HandCoins class="size-5" />
+                  </span>
+                  <div>
+                    <p class="text-xs text-success">{{ t('dashboard.debtCollected') }}</p>
+                    <p class="font-bold text-success tnum">
+                      {{ formatMoney(s.debts.collectedInRange) }}
+                    </p>
+                  </div>
                 </div>
                 <div class="mt-3 grid grid-cols-2 gap-3">
                   <div class="rounded-xl bg-surface-2 p-3">
