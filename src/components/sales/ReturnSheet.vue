@@ -51,21 +51,29 @@ const maxQty = computed(() =>
 )
 const maxAmount = computed(() => (selected.value ? selected.value.unitPrice * form.quantity : 0))
 
+/** Prefill the amount with the sold price for the current item × quantity. */
+function syncAmount() {
+  form.amount = maxAmount.value || null
+}
+
 watch(open, (v) => {
   if (!v) return
   Object.keys(errors).forEach((k) => delete errors[k])
   form.saleItemId = returnable.value[0]?.id
   form.quantity = 1
-  form.amount = null
   form.reason = ''
+  syncAmount()
 })
 
 watch(
   () => form.saleItemId,
   () => {
     form.quantity = 1
+    syncAmount()
   },
 )
+
+watch(() => form.quantity, syncAmount)
 
 function validate(): boolean {
   Object.keys(errors).forEach((k) => delete errors[k])

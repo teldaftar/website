@@ -27,7 +27,9 @@ async function onLogout() {
 </script>
 
 <template>
-  <aside class="hidden w-64 shrink-0 flex-col border-r border-border bg-surface lg:flex">
+  <aside
+    class="hidden w-64 shrink-0 flex-col border-r border-border bg-surface lg:flex lg:sticky lg:top-0 lg:h-dvh"
+  >
     <!-- Shop identity -->
     <div class="flex items-center gap-3 px-5 py-5">
       <div class="grid size-10 place-items-center rounded-xl bg-primary text-primary-fg">
