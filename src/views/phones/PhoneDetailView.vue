@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { Smartphone, Pencil, Trash2, Tag, ShoppingCart, Undo2 } from 'lucide-vue-next'
 import { usePhone, useDeletePhone } from '@/composables/usePhones'
 import { usePhoneSale } from '@/composables/useSales'
-import { formatMoney, formatMemory, formatDateTime, resolveImageUrl } from '@/lib/format'
+import { formatMoney, formatMemory, formatDateTime, formatPhone, resolveImageUrl } from '@/lib/format'
 import { phoneCondition, phoneStatus } from '@/lib/labels'
 import { toUserMessage } from '@/api/errors'
 import { notify } from '@/lib/toast'
@@ -44,6 +44,12 @@ const returnableSale = computed(() => {
 const inStock = computed(() => phone.value?.status === 'IN_STOCK')
 const memory = computed(() =>
   phone.value ? formatMemory(phone.value.ramGb, phone.value.storageGb) : '',
+)
+const supplierName = computed(() =>
+  [phone.value?.supplierName, phone.value?.supplierSurname].filter(Boolean).join(' ').trim(),
+)
+const hasSupplier = computed(
+  () => !!(supplierName.value || phone.value?.supplierPhone),
 )
 
 const showEdit = ref(false)
@@ -169,6 +175,28 @@ function sell() {
               </dl>
             </div>
           </Card>
+
+          <!-- Supplier (who the phone was bought from) -->
+          <div v-if="hasSupplier">
+            <h3 class="mb-2 px-1 text-sm font-semibold text-fg-muted">{{ t('phones.supplier') }}</h3>
+            <Card>
+              <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <p v-if="supplierName" class="font-semibold text-fg">{{ supplierName }}</p>
+                  <p v-if="phone.supplierPhone" class="text-sm text-fg-muted tnum">
+                    {{ formatPhone(phone.supplierPhone) }}
+                  </p>
+                </div>
+                <a
+                  v-if="phone.supplierPhone"
+                  :href="`tel:${phone.supplierPhone}`"
+                  class="shrink-0 text-sm font-medium text-primary"
+                >
+                  {{ t('app.call') }}
+                </a>
+              </div>
+            </Card>
+          </div>
 
           <!-- Debt block -->
           <div v-if="phone.debt">

@@ -6,11 +6,12 @@ import type { Accessory, Phone, Sale } from '@/api/types'
 import { useCreatePhoneSale, useCreateAccessorySale } from '@/composables/useSales'
 import { createDebtState, validateDebt, buildDebt } from '@/composables/useSaleDebt'
 import { normalizeError, mapErrorCode } from '@/api/errors'
-import { formatMoney, formatMemory } from '@/lib/format'
+import { formatMoney, formatMemory, normalizePhone } from '@/lib/format'
 import { notify } from '@/lib/toast'
 import { t } from '@/i18n'
 import ModalSheet from '@/components/ui/ModalSheet.vue'
 import MoneyInput from '@/components/ui/MoneyInput.vue'
+import AppInput from '@/components/ui/AppInput.vue'
 import AppTextarea from '@/components/ui/AppTextarea.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import QuantityStepper from '@/components/ui/QuantityStepper.vue'
@@ -38,6 +39,10 @@ const price = ref<number | null>(null)
 const quantity = ref(1)
 const unitPrice = ref<number | null>(null)
 const note = ref('')
+// Optional customer info recorded for any sale. On a debt sale the debt block
+// captures the customer instead (backend auto-fills these from it).
+const customerName = ref('')
+const customerPhone = ref('')
 const debt = createDebtState()
 const errors = reactive<Record<string, string>>({})
 const submitting = ref(false)
@@ -69,6 +74,8 @@ function reset() {
   quantity.value = 1
   unitPrice.value = null
   note.value = ''
+  customerName.value = ''
+  customerPhone.value = ''
   debt.enabled = false
   debt.amount = null
   debt.dueDate = ''
@@ -93,6 +100,14 @@ function validate(): boolean {
 async function submit() {
   if (!validate()) return
   submitting.value = true
+  // Customer is only entered directly on non-debt sales; on debt sales the debt
+  // block owns it and the backend fills these from the debt customer.
+  const customer = debt.enabled
+    ? {}
+    : {
+        customerName: customerName.value.trim() || undefined,
+        customerPhone: normalizePhone(customerPhone.value) || undefined,
+      }
   try {
     let sale: Sale
     if (props.phone) {
@@ -101,6 +116,7 @@ async function submit() {
         price: price.value as number,
         note: note.value || undefined,
         debt: buildDebt(debt),
+        ...customer,
       })
     } else if (props.accessory) {
       sale = await createAccessorySale.mutateAsync({
@@ -109,6 +125,7 @@ async function submit() {
         unitPrice: unitPrice.value ?? undefined,
         note: note.value || undefined,
         debt: buildDebt(debt),
+        ...customer,
       })
     } else {
       return
@@ -221,6 +238,22 @@ function openReceipt() {
       </template>
 
       <AppTextarea v-model="note" :label="t('sales.note')" :rows="2" />
+
+      <!-- Optional customer (hidden on debt sales — the debt block captures it) -->
+      <template v-if="!debt.enabled">
+        <AppInput
+          v-model="customerName"
+          :label="t('sales.customerName')"
+          :hint="t('app.optional')"
+        />
+        <AppInput
+          v-model="customerPhone"
+          :label="t('sales.customerPhone')"
+          inputmode="tel"
+          placeholder="998 90 123 45 67"
+        />
+      </template>
+
       <DebtBlock :state="debt" :total="total" :errors="errors" />
 
       <div class="flex gap-3 pt-1">

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Smartphone, Headphones } from 'lucide-vue-next'
+import { Smartphone, Headphones, User } from 'lucide-vue-next'
 import type { Sale } from '@/api/types'
 import { formatMoney, formatDate, resolveImageUrl } from '@/lib/format'
 import { saleStatus } from '@/lib/labels'
@@ -20,6 +20,8 @@ const subtitle = computed(() => {
   return p.memory || p.imei || ''
 })
 const status = computed(() => saleStatus(props.sale.status))
+/** Customer name — from the sale, falling back to the debt customer. */
+const customer = computed(() => props.sale.customerName || props.sale.debt?.customerName || '')
 /** Remaining debt (falls back to the initial amount if `debt` isn't embedded). */
 const remainingDebt = computed(() => props.sale.debt?.amount ?? props.sale.debtAmount)
 </script>
@@ -44,6 +46,9 @@ const remainingDebt = computed(() => props.sale.debt?.amount ?? props.sale.debtA
           <span class="shrink-0 text-xs text-fg-muted tnum">{{ sale.code }}</span>
         </div>
         <p v-if="subtitle" class="truncate text-xs text-fg-muted">{{ subtitle }}</p>
+        <p v-if="customer" class="mt-0.5 flex items-center gap-1 truncate text-xs text-fg-muted">
+          <User class="size-3 shrink-0" />{{ customer }}
+        </p>
         <div class="mt-1 flex items-center justify-between gap-2">
           <span class="font-bold text-fg tnum">{{ formatMoney(sale.totalAmount) }}</span>
           <span class="text-xs text-fg-muted">{{ formatDate(sale.soldAt) }}</span>

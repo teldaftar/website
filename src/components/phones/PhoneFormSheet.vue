@@ -35,6 +35,9 @@ interface FormState {
   storageGb: string
   note: string
   imageUrl: string | null
+  supplierName: string
+  supplierSurname: string
+  supplierPhone: string
 }
 
 const form = reactive<FormState>(blank())
@@ -51,6 +54,9 @@ function blank(): FormState {
     storageGb: '',
     note: '',
     imageUrl: null,
+    supplierName: '',
+    supplierSurname: '',
+    supplierPhone: '',
   }
 }
 
@@ -69,6 +75,9 @@ watch(open, (v) => {
     form.storageGb = p.storageGb != null ? String(p.storageGb) : ''
     form.note = p.note ?? ''
     form.imageUrl = p.imageUrl ?? null
+    form.supplierName = p.supplierName ?? ''
+    form.supplierSurname = p.supplierSurname ?? ''
+    form.supplierPhone = p.supplierPhone ?? ''
   } else {
     Object.assign(form, blank())
   }
@@ -76,6 +85,7 @@ watch(open, (v) => {
 
 const conditionOptions = [
   { label: t('phones.conditionNew'), value: 'NEW' as const },
+  { label: t('phones.conditionMedium'), value: 'MEDIUM' as const },
   { label: t('phones.conditionUsed'), value: 'USED' as const },
 ]
 
@@ -84,9 +94,7 @@ function validate(): boolean {
   // On a sold phone only note/image are editable, so skip the locked fields.
   if (!isSold()) {
     if (!form.name.trim()) errors.name = t('validation.required')
-    // IMEI is optional; only validate the format when the user typed something.
-    if (form.imei.trim() && !/^\d{10,20}$/.test(form.imei.trim()))
-      errors.imei = t('validation.imeiDigits')
+    // IMEI is optional free-form text now — no format rule.
     if (form.purchasePrice == null || form.purchasePrice <= 0)
       errors.purchasePrice = t('validation.required')
   }
@@ -125,6 +133,9 @@ async function onSubmit() {
       storageGb: toNum(form.storageGb) ?? null,
       note: form.note || null,
       imageUrl: form.imageUrl,
+      supplierName: form.supplierName.trim() || null,
+      supplierSurname: form.supplierSurname.trim() || null,
+      supplierPhone: form.supplierPhone.trim() || null,
     }
 
     const saved = props.phone
@@ -180,7 +191,6 @@ function handleError(err: unknown) {
       <AppInput
         v-model="form.imei"
         :label="t('phones.imei')"
-        inputmode="numeric"
         :error="errors.imei"
         :hint="t('app.optional')"
         :disabled="isSold()"
@@ -218,6 +228,30 @@ function handleError(err: unknown) {
 
       <AppTextarea v-model="form.note" :label="t('phones.note')" :rows="2" />
       <ImageUploader v-model="form.imageUrl" :label="t('phones.image')" />
+
+      <!-- Supplier (who the phone was bought from) — all optional -->
+      <fieldset class="space-y-3 rounded-2xl border border-border bg-surface-2/40 p-4">
+        <legend class="px-1 text-sm font-medium text-fg-muted">{{ t('phones.supplier') }}</legend>
+        <div class="grid grid-cols-2 gap-3">
+          <AppInput
+            v-model="form.supplierName"
+            :label="t('phones.supplierName')"
+            :disabled="isSold()"
+          />
+          <AppInput
+            v-model="form.supplierSurname"
+            :label="t('phones.supplierSurname')"
+            :disabled="isSold()"
+          />
+        </div>
+        <AppInput
+          v-model="form.supplierPhone"
+          :label="t('phones.supplierPhone')"
+          inputmode="tel"
+          placeholder="998 90 123 45 67"
+          :disabled="isSold()"
+        />
+      </fieldset>
 
       <div class="flex gap-3 pt-1">
         <AppButton type="button" variant="secondary" block @click="open = false">

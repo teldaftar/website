@@ -94,7 +94,7 @@ export interface UpdateShopPayload {
  * Phones
  * ------------------------------------------------------------------------- */
 
-export type PhoneCondition = 'NEW' | 'USED'
+export type PhoneCondition = 'NEW' | 'MEDIUM' | 'USED'
 export type PhoneStatus = 'IN_STOCK' | 'SOLD'
 
 export interface Phone {
@@ -112,6 +112,10 @@ export interface Phone {
   storageGb?: number | null
   note?: string | null
   imageUrl?: string | null
+  /** Who the phone was bought from (all optional) — for follow-up contact. */
+  supplierName?: string | null
+  supplierSurname?: string | null
+  supplierPhone?: string | null
   status: PhoneStatus
   /** Present when the phone was sold on debt (null for a cash sale). */
   debt?: EmbeddedDebt | null
@@ -133,7 +137,7 @@ export interface PhoneListQuery {
 
 export interface CreatePhonePayload {
   name: string
-  /** Optional. NB: the backend currently marks this required — see README. */
+  /** Optional, free-form text up to 500 chars — no digit-count rule anymore. */
   imei?: string
   purchasePrice: number
   listPrice?: number | null
@@ -142,6 +146,10 @@ export interface CreatePhonePayload {
   storageGb?: number | null
   note?: string | null
   imageUrl?: string | null
+  /** Supplier (person the phone was bought from) — all optional. */
+  supplierName?: string | null
+  supplierSurname?: string | null
+  supplierPhone?: string | null
 }
 
 export type UpdatePhonePayload = Partial<CreatePhonePayload>
@@ -328,6 +336,9 @@ export interface Sale {
   profit: number
   items: SaleItem[]
   debt?: EmbeddedDebt | null
+  /** Customer info recorded for any sale (auto-filled from the debt on debt sales). */
+  customerName?: string | null
+  customerPhone?: string | null
 }
 
 export interface SaleListQuery {
@@ -345,6 +356,9 @@ export interface CreatePhoneSalePayload {
   price: number
   note?: string
   debt?: DebtInput
+  /** Optional; on a debt sale, backend fills these from the debt customer when omitted. */
+  customerName?: string
+  customerPhone?: string
 }
 
 export interface CreateAccessorySalePayload {
@@ -353,6 +367,9 @@ export interface CreateAccessorySalePayload {
   unitPrice?: number
   note?: string
   debt?: DebtInput
+  /** Optional; on a debt sale, backend fills these from the debt customer when omitted. */
+  customerName?: string
+  customerPhone?: string
 }
 
 export interface ReturnPayload {

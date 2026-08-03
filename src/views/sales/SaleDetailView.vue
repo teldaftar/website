@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { Smartphone, Headphones, Undo2 } from 'lucide-vue-next'
 import { useSale, useSaleReturns } from '@/composables/useSales'
-import { formatMoney, formatDateTime, formatDate } from '@/lib/format'
+import { formatMoney, formatDateTime, formatDate, formatPhone } from '@/lib/format'
 import { saleStatus } from '@/lib/labels'
 import { toUserMessage } from '@/api/errors'
 import { t } from '@/i18n'
@@ -32,6 +32,10 @@ const canReturn = computed(
 )
 /** Remaining debt on this sale (falls back to the initial debt if `debt` is absent). */
 const remainingDebt = computed(() => sale.value?.debt?.amount ?? sale.value?.debtAmount ?? 0)
+/** Customer card is shown for non-debt sales (the debt card already surfaces the customer). */
+const showCustomer = computed(
+  () => !sale.value?.debt && !!(sale.value?.customerName || sale.value?.customerPhone),
+)
 </script>
 
 <template>
@@ -116,6 +120,30 @@ const remainingDebt = computed(() => sale.value?.debt?.amount ?? sale.value?.deb
                 <span class="shrink-0 font-semibold text-fg tnum">{{
                   formatMoney(item.lineTotal)
                 }}</span>
+              </div>
+            </Card>
+          </div>
+
+          <!-- Customer (non-debt sales) -->
+          <div v-if="showCustomer">
+            <h3 class="mb-2 px-1 text-sm font-semibold text-fg-muted">{{ t('sales.customer') }}</h3>
+            <Card>
+              <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <p v-if="sale.customerName" class="font-semibold text-fg">
+                    {{ sale.customerName }}
+                  </p>
+                  <p v-if="sale.customerPhone" class="text-sm text-fg-muted tnum">
+                    {{ formatPhone(sale.customerPhone) }}
+                  </p>
+                </div>
+                <a
+                  v-if="sale.customerPhone"
+                  :href="`tel:${sale.customerPhone}`"
+                  class="shrink-0 text-sm font-medium text-primary"
+                >
+                  {{ t('app.call') }}
+                </a>
               </div>
             </Card>
           </div>

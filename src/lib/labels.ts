@@ -11,9 +11,14 @@ export function phoneStatus(status: PhoneStatus): { label: string; tone: Tone } 
 }
 
 export function phoneCondition(condition: PhoneCondition): { label: string; tone: Tone } {
-  return condition === 'USED'
-    ? { label: t('phones.conditionUsed'), tone: 'warning' }
-    : { label: t('phones.conditionNew'), tone: 'info' }
+  switch (condition) {
+    case 'USED':
+      return { label: t('phones.conditionUsed'), tone: 'warning' }
+    case 'MEDIUM':
+      return { label: t('phones.conditionMedium'), tone: 'warning' }
+    default:
+      return { label: t('phones.conditionNew'), tone: 'info' }
+  }
 }
 
 export function saleStatus(status: SaleStatus): { label: string; tone: Tone } {
