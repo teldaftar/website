@@ -5,7 +5,7 @@ import { Smartphone, Pencil, Trash2, Tag, ShoppingCart, Undo2 } from 'lucide-vue
 import { usePhone, useDeletePhone } from '@/composables/usePhones'
 import { usePhoneSale } from '@/composables/useSales'
 import { formatMoney, formatMemory, formatDateTime, formatPhone, resolveImageUrl } from '@/lib/format'
-import { phoneCondition, phoneStatus } from '@/lib/labels'
+import { phoneCondition, usedGrade, phoneStatus } from '@/lib/labels'
 import { toUserMessage } from '@/api/errors'
 import { notify } from '@/lib/toast'
 import { t } from '@/i18n'
@@ -161,6 +161,14 @@ function sell() {
                   <dd>
                     <Badge :tone="phoneCondition(phone.condition).tone">
                       {{ phoneCondition(phone.condition).label }}
+                    </Badge>
+                  </dd>
+                </div>
+                <div v-if="phone.usedGrade" class="flex justify-between gap-2">
+                  <dt class="text-fg-muted">{{ t('phones.usedGrade') }}</dt>
+                  <dd>
+                    <Badge :tone="usedGrade(phone.usedGrade).tone">
+                      {{ usedGrade(phone.usedGrade).label }}
                     </Badge>
                   </dd>
                 </div>

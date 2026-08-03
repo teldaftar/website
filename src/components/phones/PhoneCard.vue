@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { Smartphone, ShoppingCart, Pencil, Tag, Trash2 } from 'lucide-vue-next'
 import type { Phone } from '@/api/types'
 import { formatMoney, formatMemory, resolveImageUrl } from '@/lib/format'
-import { phoneCondition, phoneStatus } from '@/lib/labels'
+import { phoneCondition, usedGrade, phoneStatus } from '@/lib/labels'
 import { t } from '@/i18n'
 import Badge from '@/components/ui/Badge.vue'
 
@@ -15,6 +15,7 @@ const status = computed(() => phoneStatus(props.phone.status))
 const condition = computed(() =>
   props.phone.condition ? phoneCondition(props.phone.condition) : null,
 )
+const grade = computed(() => (props.phone.usedGrade ? usedGrade(props.phone.usedGrade) : null))
 const image = computed(() => resolveImageUrl(props.phone.imageUrl))
 const inStock = computed(() => props.phone.status === 'IN_STOCK')
 </script>
@@ -43,6 +44,7 @@ const inStock = computed(() => props.phone.status === 'IN_STOCK')
           <div class="flex shrink-0 flex-wrap items-center justify-end gap-1">
             <Badge v-if="phone.hasBox" tone="success">{{ t('phones.hasBoxYes') }}</Badge>
             <Badge v-if="condition" :tone="condition.tone">{{ condition.label }}</Badge>
+            <Badge v-if="grade" :tone="grade.tone">{{ grade.label }}</Badge>
           </div>
         </div>
         <!-- Sold: olingan / sotilgan / foyda side by side -->

@@ -94,7 +94,9 @@ export interface UpdateShopPayload {
  * Phones
  * ------------------------------------------------------------------------- */
 
-export type PhoneCondition = 'NEW' | 'MEDIUM' | 'USED'
+export type PhoneCondition = 'NEW' | 'USED'
+/** Grade of a used phone — only set when condition is USED (null otherwise). */
+export type UsedGrade = 'GOOD' | 'MEDIUM' | 'BAD'
 export type PhoneStatus = 'IN_STOCK' | 'SOLD'
 
 export interface Phone {
@@ -108,6 +110,8 @@ export interface Phone {
   /** Set once the phone is sold (null while IN_STOCK). */
   profit?: number | null
   condition?: PhoneCondition | null
+  /** Set only when condition is USED (null for NEW / unset). */
+  usedGrade?: UsedGrade | null
   /** Whether the phone still has its original box (optional). */
   hasBox?: boolean | null
   ramGb?: number | null
@@ -144,6 +148,8 @@ export interface CreatePhonePayload {
   purchasePrice: number
   listPrice?: number | null
   condition?: PhoneCondition
+  /** Set only when condition is USED (send null / omit for NEW). */
+  usedGrade?: UsedGrade | null
   /** Whether the phone still has its original box (optional). */
   hasBox?: boolean | null
   ramGb?: number | null

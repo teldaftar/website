@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import type { CreatePhonePayload, Phone, PhoneCondition } from '@/api/types'
+import type { CreatePhonePayload, Phone, PhoneCondition, UsedGrade } from '@/api/types'
 import { useCreatePhone, useUpdatePhone } from '@/composables/usePhones'
 import { normalizeError, mapErrorCode } from '@/api/errors'
 import { notify } from '@/lib/toast'
@@ -32,6 +32,7 @@ interface FormState {
   purchasePrice: number | null
   listPrice: number | null
   condition: PhoneCondition | undefined
+  usedGrade: UsedGrade | undefined
   hasBox: boolean
   ramGb: string
   storageGb: string
@@ -52,6 +53,7 @@ function blank(): FormState {
     purchasePrice: null,
     listPrice: null,
     condition: undefined,
+    usedGrade: undefined,
     hasBox: false,
     ramGb: '',
     storageGb: '',
@@ -74,6 +76,7 @@ watch(open, (v) => {
     form.purchasePrice = p.purchasePrice
     form.listPrice = p.listPrice ?? null
     form.condition = p.condition ?? undefined
+    form.usedGrade = p.usedGrade ?? undefined
     form.hasBox = p.hasBox ?? false
     form.ramGb = p.ramGb != null ? String(p.ramGb) : ''
     form.storageGb = p.storageGb != null ? String(p.storageGb) : ''
@@ -89,9 +92,22 @@ watch(open, (v) => {
 
 const conditionOptions = [
   { label: t('phones.conditionNew'), value: 'NEW' as const },
-  { label: t('phones.conditionMedium'), value: 'MEDIUM' as const },
   { label: t('phones.conditionUsed'), value: 'USED' as const },
 ]
+
+const usedGradeOptions = [
+  { label: t('phones.gradeGood'), value: 'GOOD' as const },
+  { label: t('phones.gradeMedium'), value: 'MEDIUM' as const },
+  { label: t('phones.gradeBad'), value: 'BAD' as const },
+]
+
+// usedGrade only applies to a USED phone — clear it when leaving USED.
+watch(
+  () => form.condition,
+  (c) => {
+    if (c !== 'USED') form.usedGrade = undefined
+  },
+)
 
 function validate(): boolean {
   Object.keys(errors).forEach((k) => delete errors[k])
@@ -133,6 +149,7 @@ async function onSubmit() {
       purchasePrice: form.purchasePrice as number,
       listPrice: form.listPrice,
       condition: form.condition || undefined,
+      usedGrade: form.condition === 'USED' ? form.usedGrade || null : null,
       hasBox: form.hasBox,
       ramGb: toNum(form.ramGb) ?? null,
       storageGb: toNum(form.storageGb) ?? null,
@@ -227,6 +244,15 @@ function handleError(err: unknown) {
         v-model="form.condition"
         :label="t('phones.condition')"
         :options="conditionOptions"
+        :placeholder="t('app.all')"
+        :disabled="isSold()"
+      />
+
+      <AppSelect
+        v-if="form.condition === 'USED'"
+        v-model="form.usedGrade"
+        :label="t('phones.usedGrade')"
+        :options="usedGradeOptions"
         :placeholder="t('app.all')"
         :disabled="isSold()"
       />

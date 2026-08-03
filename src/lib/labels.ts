@@ -1,5 +1,5 @@
 import { t } from '@/i18n'
-import type { PhoneCondition, PhoneStatus, SaleStatus, DebtStatus } from '@/api/types'
+import type { PhoneCondition, UsedGrade, PhoneStatus, SaleStatus, DebtStatus } from '@/api/types'
 
 /** Semantic tones map to the StatusPill / Badge colour variants. */
 export type Tone = 'neutral' | 'primary' | 'success' | 'danger' | 'warning' | 'info'
@@ -11,13 +11,19 @@ export function phoneStatus(status: PhoneStatus): { label: string; tone: Tone } 
 }
 
 export function phoneCondition(condition: PhoneCondition): { label: string; tone: Tone } {
-  switch (condition) {
-    case 'USED':
-      return { label: t('phones.conditionUsed'), tone: 'warning' }
-    case 'MEDIUM':
-      return { label: t('phones.conditionMedium'), tone: 'warning' }
+  return condition === 'USED'
+    ? { label: t('phones.conditionUsed'), tone: 'warning' }
+    : { label: t('phones.conditionNew'), tone: 'info' }
+}
+
+export function usedGrade(grade: UsedGrade): { label: string; tone: Tone } {
+  switch (grade) {
+    case 'GOOD':
+      return { label: t('phones.gradeGood'), tone: 'success' }
+    case 'BAD':
+      return { label: t('phones.gradeBad'), tone: 'danger' }
     default:
-      return { label: t('phones.conditionNew'), tone: 'info' }
+      return { label: t('phones.gradeMedium'), tone: 'warning' }
   }
 }
 
