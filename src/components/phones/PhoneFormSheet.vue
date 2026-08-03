@@ -12,6 +12,7 @@ import AppSelect from '@/components/ui/AppSelect.vue'
 import AppTextarea from '@/components/ui/AppTextarea.vue'
 import MoneyInput from '@/components/ui/MoneyInput.vue'
 import ImageUploader from '@/components/ui/ImageUploader.vue'
+import Toggle from '@/components/ui/Toggle.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 
 const props = defineProps<{ phone?: Phone }>()
@@ -31,6 +32,7 @@ interface FormState {
   purchasePrice: number | null
   listPrice: number | null
   condition: PhoneCondition | undefined
+  hasBox: boolean
   ramGb: string
   storageGb: string
   note: string
@@ -50,6 +52,7 @@ function blank(): FormState {
     purchasePrice: null,
     listPrice: null,
     condition: undefined,
+    hasBox: false,
     ramGb: '',
     storageGb: '',
     note: '',
@@ -71,6 +74,7 @@ watch(open, (v) => {
     form.purchasePrice = p.purchasePrice
     form.listPrice = p.listPrice ?? null
     form.condition = p.condition ?? undefined
+    form.hasBox = p.hasBox ?? false
     form.ramGb = p.ramGb != null ? String(p.ramGb) : ''
     form.storageGb = p.storageGb != null ? String(p.storageGb) : ''
     form.note = p.note ?? ''
@@ -129,6 +133,7 @@ async function onSubmit() {
       purchasePrice: form.purchasePrice as number,
       listPrice: form.listPrice,
       condition: form.condition || undefined,
+      hasBox: form.hasBox,
       ramGb: toNum(form.ramGb) ?? null,
       storageGb: toNum(form.storageGb) ?? null,
       note: form.note || null,
@@ -225,6 +230,15 @@ function handleError(err: unknown) {
         :placeholder="t('app.all')"
         :disabled="isSold()"
       />
+
+      <label
+        class="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-2/40 px-4 py-3"
+      >
+        <span class="font-medium text-fg">{{
+          form.hasBox ? t('phones.hasBoxYes') : t('phones.hasBoxNo')
+        }}</span>
+        <Toggle v-model="form.hasBox" :disabled="isSold()" />
+      </label>
 
       <AppTextarea v-model="form.note" :label="t('phones.note')" :rows="2" />
       <ImageUploader v-model="form.imageUrl" :label="t('phones.image')" />

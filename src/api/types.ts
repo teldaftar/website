@@ -108,6 +108,8 @@ export interface Phone {
   /** Set once the phone is sold (null while IN_STOCK). */
   profit?: number | null
   condition?: PhoneCondition | null
+  /** Whether the phone still has its original box (optional). */
+  hasBox?: boolean | null
   ramGb?: number | null
   storageGb?: number | null
   note?: string | null
@@ -142,6 +144,8 @@ export interface CreatePhonePayload {
   purchasePrice: number
   listPrice?: number | null
   condition?: PhoneCondition
+  /** Whether the phone still has its original box (optional). */
+  hasBox?: boolean | null
   ramGb?: number | null
   storageGb?: number | null
   note?: string | null

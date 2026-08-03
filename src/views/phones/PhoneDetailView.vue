@@ -164,6 +164,14 @@ function sell() {
                     </Badge>
                   </dd>
                 </div>
+                <div v-if="phone.hasBox != null" class="flex justify-between gap-2">
+                  <dt class="text-fg-muted">{{ t('phones.hasBox') }}</dt>
+                  <dd>
+                    <Badge :tone="phone.hasBox ? 'success' : 'neutral'">
+                      {{ phone.hasBox ? t('phones.hasBoxYes') : t('phones.hasBoxNo') }}
+                    </Badge>
+                  </dd>
+                </div>
                 <div v-if="phone.note" class="flex justify-between gap-2">
                   <dt class="text-fg-muted">{{ t('phones.note') }}</dt>
                   <dd class="max-w-[60%] text-right text-fg">{{ phone.note }}</dd>

@@ -40,7 +40,10 @@ const inStock = computed(() => props.phone.status === 'IN_STOCK')
         <!-- In stock: purchase price + condition -->
         <div v-if="inStock" class="mt-1.5 flex items-center justify-between gap-2">
           <span class="font-bold text-fg tnum">{{ formatMoney(phone.purchasePrice) }}</span>
-          <Badge v-if="condition" :tone="condition.tone">{{ condition.label }}</Badge>
+          <div class="flex shrink-0 flex-wrap items-center justify-end gap-1">
+            <Badge v-if="phone.hasBox" tone="success">{{ t('phones.hasBoxYes') }}</Badge>
+            <Badge v-if="condition" :tone="condition.tone">{{ condition.label }}</Badge>
+          </div>
         </div>
         <!-- Sold: olingan / sotilgan / foyda side by side -->
         <div v-else>
