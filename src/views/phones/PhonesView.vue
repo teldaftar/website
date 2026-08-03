@@ -155,7 +155,7 @@ async function confirmDelete() {
         @retry="refetch"
       >
         <template #skeleton>
-          <div class="grid gap-3 lg:grid-cols-2">
+          <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
             <SkeletonBlock v-for="i in 6" :key="i" class="h-36 rounded-2xl" />
           </div>
         </template>
@@ -172,7 +172,7 @@ async function confirmDelete() {
           </EmptyState>
         </template>
 
-        <TransitionGroup tag="div" name="list" class="grid gap-3 lg:grid-cols-2">
+        <TransitionGroup tag="div" name="list" class="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <PhoneCard
             v-for="phone in items"
             :key="phone.id"

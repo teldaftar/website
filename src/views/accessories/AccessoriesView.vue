@@ -131,7 +131,7 @@ async function confirmDelete() {
         @retry="current.refetch()"
       >
         <template #skeleton>
-          <div class="grid gap-3 lg:grid-cols-2">
+          <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
             <SkeletonBlock v-for="i in 6" :key="i" class="h-32 rounded-2xl" />
           </div>
         </template>
@@ -148,7 +148,7 @@ async function confirmDelete() {
           </EmptyState>
         </template>
 
-        <TransitionGroup tag="div" name="list" class="grid gap-3 lg:grid-cols-2">
+        <TransitionGroup tag="div" name="list" class="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <AccessoryCard
             v-for="accessory in current.items.value"
             :key="accessory.id"
@@ -179,7 +179,7 @@ async function confirmDelete() {
         @retry="sold.refetch()"
       >
         <template #skeleton>
-          <div class="grid gap-3 lg:grid-cols-2">
+          <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
             <SkeletonBlock v-for="i in 6" :key="i" class="h-28 rounded-2xl" />
           </div>
         </template>
@@ -192,7 +192,7 @@ async function confirmDelete() {
           />
         </template>
 
-        <TransitionGroup tag="div" name="list" class="grid gap-3 lg:grid-cols-2">
+        <TransitionGroup tag="div" name="list" class="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <SoldAccessoryCard
             v-for="row in sold.items.value"
             :key="row.accessoryId"
