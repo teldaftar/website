@@ -38,6 +38,9 @@ export function useUpdatePhone() {
     onSuccess: (phone) => {
       qc.invalidateQueries({ queryKey: ['phones'] })
       qc.invalidateQueries({ queryKey: ['phone', phone.id] })
+      // The label is a separate query — refresh it too, or it stays stale
+      // (e.g. an IMEI added on edit won't show until a manual reload).
+      qc.invalidateQueries({ queryKey: ['phone-label', phone.id] })
     },
   })
 }
