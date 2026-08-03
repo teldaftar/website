@@ -114,6 +114,8 @@ export interface Phone {
   usedGrade?: UsedGrade | null
   /** Whether the phone still has its original box (optional). */
   hasBox?: boolean | null
+  /** Whether the phone comes with a charger (optional). */
+  hasCharger?: boolean | null
   ramGb?: number | null
   storageGb?: number | null
   note?: string | null
@@ -152,6 +154,8 @@ export interface CreatePhonePayload {
   usedGrade?: UsedGrade | null
   /** Whether the phone still has its original box (optional). */
   hasBox?: boolean | null
+  /** Whether the phone comes with a charger (optional). */
+  hasCharger?: boolean | null
   ramGb?: number | null
   storageGb?: number | null
   note?: string | null

@@ -15,14 +15,17 @@ const route = useRoute()
     <div class="flex min-h-dvh w-full flex-col">
       <TopBar />
 
-      <!-- Leaving views are absolutely positioned (see main.css) so the
-           direction-aware slide cross-fades without a layout jump. -->
-      <main class="relative flex-1 overflow-x-hidden">
-        <RouterView v-slot="{ Component }">
-          <Transition :name="transitionName">
-            <component :is="Component" :key="route.path" />
-          </Transition>
-        </RouterView>
+      <!-- Padding lives on <main>; the positioning context is the inner wrapper
+           (no padding) so the absolutely-positioned leaving view (see main.css)
+           lines up with the in-flow entering view — no vertical jump. -->
+      <main class="flex-1 pt-5">
+        <div class="relative min-h-full overflow-x-hidden">
+          <RouterView v-slot="{ Component }">
+            <Transition :name="transitionName">
+              <component :is="Component" :key="route.path" />
+            </Transition>
+          </RouterView>
+        </div>
       </main>
 
       <BottomNav />

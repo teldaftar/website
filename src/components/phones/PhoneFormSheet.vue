@@ -34,6 +34,7 @@ interface FormState {
   condition: PhoneCondition | undefined
   usedGrade: UsedGrade | undefined
   hasBox: boolean
+  hasCharger: boolean
   ramGb: string
   storageGb: string
   note: string
@@ -55,6 +56,7 @@ function blank(): FormState {
     condition: undefined,
     usedGrade: undefined,
     hasBox: false,
+    hasCharger: false,
     ramGb: '',
     storageGb: '',
     note: '',
@@ -78,6 +80,7 @@ watch(open, (v) => {
     form.condition = p.condition ?? undefined
     form.usedGrade = p.usedGrade ?? undefined
     form.hasBox = p.hasBox ?? false
+    form.hasCharger = p.hasCharger ?? false
     form.ramGb = p.ramGb != null ? String(p.ramGb) : ''
     form.storageGb = p.storageGb != null ? String(p.storageGb) : ''
     form.note = p.note ?? ''
@@ -151,6 +154,7 @@ async function onSubmit() {
       condition: form.condition || undefined,
       usedGrade: form.condition === 'USED' ? form.usedGrade || null : null,
       hasBox: form.hasBox,
+      hasCharger: form.hasCharger,
       ramGb: toNum(form.ramGb) ?? null,
       storageGb: toNum(form.storageGb) ?? null,
       note: form.note || null,
@@ -264,6 +268,15 @@ function handleError(err: unknown) {
           form.hasBox ? t('phones.hasBoxYes') : t('phones.hasBoxNo')
         }}</span>
         <Toggle v-model="form.hasBox" :disabled="isSold()" />
+      </label>
+
+      <label
+        class="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-2/40 px-4 py-3"
+      >
+        <span class="font-medium text-fg">{{
+          form.hasCharger ? t('phones.hasChargerYes') : t('phones.hasChargerNo')
+        }}</span>
+        <Toggle v-model="form.hasCharger" :disabled="isSold()" />
       </label>
 
       <AppTextarea v-model="form.note" :label="t('phones.note')" :rows="2" />

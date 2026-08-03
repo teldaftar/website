@@ -180,6 +180,14 @@ function sell() {
                     </Badge>
                   </dd>
                 </div>
+                <div v-if="phone.hasCharger != null" class="flex justify-between gap-2">
+                  <dt class="text-fg-muted">{{ t('phones.hasCharger') }}</dt>
+                  <dd>
+                    <Badge :tone="phone.hasCharger ? 'success' : 'neutral'">
+                      {{ phone.hasCharger ? t('phones.hasChargerYes') : t('phones.hasChargerNo') }}
+                    </Badge>
+                  </dd>
+                </div>
                 <div v-if="phone.note" class="flex justify-between gap-2">
                   <dt class="text-fg-muted">{{ t('phones.note') }}</dt>
                   <dd class="max-w-[60%] text-right text-fg">{{ phone.note }}</dd>
