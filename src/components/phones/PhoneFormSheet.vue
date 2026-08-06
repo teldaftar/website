@@ -118,7 +118,8 @@ function validate(): boolean {
   if (!isSold()) {
     if (!form.name.trim()) errors.name = t('validation.required')
     // IMEI is optional free-form text now — no format rule.
-    if (form.purchasePrice == null || form.purchasePrice <= 0)
+    // Purchase price may be 0 (tekin — free intake); only null / negative is invalid.
+    if (form.purchasePrice == null || form.purchasePrice < 0)
       errors.purchasePrice = t('validation.required')
   }
   return Object.keys(errors).length === 0
@@ -225,6 +226,7 @@ function handleError(err: unknown) {
         v-model="form.purchasePrice"
         :label="t('phones.purchasePrice')"
         :error="errors.purchasePrice"
+        :hint="t('receipts.freeHint')"
         :disabled="isSold()"
       />
       <MoneyInput v-model="form.listPrice" :label="t('phones.listPrice')" :disabled="isSold()" />

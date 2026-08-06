@@ -2,7 +2,6 @@ import { api } from './http'
 import type {
   Accessory,
   AccessoryListQuery,
-  AddStockPayload,
   CreateAccessoryPayload,
   Paginated,
   SoldAccessoryDetail,
@@ -27,9 +26,6 @@ export const accessoriesApi = {
   },
   remove(id: string) {
     return api.delete(`/accessories/${id}`).then((r) => r.data)
-  },
-  addStock(id: string, payload: AddStockPayload) {
-    return api.post<Accessory>(`/accessories/${id}/stock`, payload).then((r) => r.data)
   },
   stockHistory(id: string) {
     return api.get<StockEntry[]>(`/accessories/${id}/stock`).then((r) => r.data)

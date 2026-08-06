@@ -6,7 +6,7 @@ import type { Accessory, Phone, Sale } from '@/api/types'
 import { useCreatePhoneSale, useCreateAccessorySale } from '@/composables/useSales'
 import { createDebtState, validateDebt, buildDebt } from '@/composables/useSaleDebt'
 import { normalizeError, mapErrorCode } from '@/api/errors'
-import { formatMoney, formatMemory, normalizePhone } from '@/lib/format'
+import { formatMoney, formatCost, formatMemory, normalizePhone } from '@/lib/format'
 import { notify } from '@/lib/toast'
 import { t } from '@/i18n'
 import ModalSheet from '@/components/ui/ModalSheet.vue'
@@ -206,7 +206,7 @@ function openReceipt() {
         </div>
         <div class="shrink-0 text-right">
           <p class="text-[11px] text-fg-muted">{{ t('phones.purchasePrice') }}</p>
-          <p class="text-sm font-bold text-fg tnum">{{ formatMoney(purchasePrice) }}</p>
+          <p class="text-sm font-bold text-fg tnum">{{ formatCost(purchasePrice) }}</p>
         </div>
       </div>
 

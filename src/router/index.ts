@@ -43,6 +43,26 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/accessories/AccessoryDetailView.vue'),
       },
       {
+        path: 'receipts',
+        name: 'receipts',
+        component: () => import('@/views/receipts/ReceiptsView.vue'),
+      },
+      {
+        path: 'receipts/new',
+        name: 'receipt-new',
+        component: () => import('@/views/receipts/NewReceiptView.vue'),
+      },
+      {
+        path: 'receipts/:id/edit',
+        name: 'receipt-edit',
+        component: () => import('@/views/receipts/NewReceiptView.vue'),
+      },
+      {
+        path: 'receipts/:id',
+        name: 'receipt-detail',
+        component: () => import('@/views/receipts/ReceiptDetailView.vue'),
+      },
+      {
         path: 'sales',
         name: 'sales',
         component: () => import('@/views/sales/SalesHistoryView.vue'),

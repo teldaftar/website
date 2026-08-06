@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Headphones, Pencil, Trash2, PackagePlus, ShoppingCart } from 'lucide-vue-next'
+import { Headphones, Pencil, Trash2, ShoppingCart } from 'lucide-vue-next'
 import { useAccessory, useStockHistory, useDeleteAccessory } from '@/composables/useAccessories'
-import { formatMoney, formatNumber, formatDate, resolveImageUrl } from '@/lib/format'
+import { formatMoney, formatCost, formatNumber, formatDate, resolveImageUrl } from '@/lib/format'
 import { toUserMessage } from '@/api/errors'
 import { notify } from '@/lib/toast'
 import { t } from '@/i18n'
@@ -16,7 +16,6 @@ import Badge from '@/components/ui/Badge.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import AccessoryFormSheet from '@/components/accessories/AccessoryFormSheet.vue'
-import StockFormSheet from '@/components/accessories/StockFormSheet.vue'
 import SaleSheet from '@/components/sales/SaleSheet.vue'
 
 const route = useRoute()
@@ -28,7 +27,6 @@ const { data: history } = useStockHistory(id)
 const deleteAccessory = useDeleteAccessory()
 
 const showEdit = ref(false)
-const showStock = ref(false)
 const showDelete = ref(false)
 const showSale = ref(false)
 
@@ -104,7 +102,7 @@ function sell() {
                   </div>
                   <div class="flex justify-between gap-2">
                     <span class="text-fg-muted">{{ t('accessories.purchasePrice') }}</span>
-                    <span class="text-fg tnum">{{ formatMoney(accessory.purchasePrice) }}</span>
+                    <span class="text-fg tnum">{{ formatCost(accessory.purchasePrice) }}</span>
                   </div>
                 </div>
               </div>
@@ -118,11 +116,7 @@ function sell() {
               <template #icon><ShoppingCart class="size-5" /></template>
               {{ t('accessories.sell') }}
             </AppButton>
-            <AppButton variant="secondary" @click="showStock = true">
-              <template #icon><PackagePlus class="size-4" /></template>
-              {{ t('accessories.addStock') }}
-            </AppButton>
-            <AppButton variant="secondary" @click="showEdit = true">
+            <AppButton variant="secondary" class="col-span-2" @click="showEdit = true">
               <template #icon><Pencil class="size-4" /></template>
               {{ t('app.edit') }}
             </AppButton>
@@ -152,7 +146,7 @@ function sell() {
                 </div>
                 <div class="text-right">
                   <p class="text-sm font-medium text-fg tnum">
-                    {{ formatMoney(entry.purchasePrice) }}
+                    {{ formatCost(entry.purchasePrice) }}
                   </p>
                   <p class="text-xs text-fg-muted">{{ formatDate(entry.createdAt) }}</p>
                 </div>
@@ -166,7 +160,6 @@ function sell() {
 
     <AccessoryFormSheet v-if="accessory" v-model="showEdit" :accessory="accessory" />
     <SaleSheet v-if="accessory" v-model="showSale" :accessory="accessory" />
-    <StockFormSheet v-if="accessory" v-model="showStock" :accessory="accessory" />
     <ConfirmDialog
       v-model="showDelete"
       :title="t('accessories.deleteConfirm')"

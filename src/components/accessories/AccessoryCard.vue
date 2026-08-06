@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Headphones, ShoppingCart, PackagePlus, Pencil, Trash2 } from 'lucide-vue-next'
+import { Headphones, ShoppingCart, Pencil, Trash2 } from 'lucide-vue-next'
 import type { Accessory } from '@/api/types'
 import { formatMoney, resolveImageUrl } from '@/lib/format'
 import { t } from '@/i18n'
 import Badge from '@/components/ui/Badge.vue'
 
 const props = defineProps<{ accessory: Accessory }>()
-defineEmits<{ open: []; sell: []; stock: []; edit: []; remove: [] }>()
+defineEmits<{ open: []; sell: []; edit: []; remove: [] }>()
 
 const image = computed(() => resolveImageUrl(props.accessory.imageUrl))
 const inStock = computed(() => props.accessory.quantity > 0)
@@ -50,13 +50,6 @@ const stock = computed(() => {
         @click="$emit('sell')"
       >
         <ShoppingCart class="size-4.5" />
-      </button>
-      <button
-        class="grid size-9 place-items-center rounded-lg border border-border text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
-        :aria-label="t('accessories.addStock')"
-        @click="$emit('stock')"
-      >
-        <PackagePlus class="size-4" />
       </button>
       <button
         class="grid size-9 place-items-center rounded-lg border border-border text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"

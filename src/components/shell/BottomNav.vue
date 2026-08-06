@@ -12,6 +12,7 @@ const activeTab = computed(() => {
   if (n.startsWith('phone')) return 'phones'
   if (n.startsWith('accessor')) return 'accessories'
   if (n === 'dashboard') return 'dashboard'
+  if (n.startsWith('receipt')) return 'more'
   // Everything secondary (sales/debts/expenses/settings) groups under "More".
   if (['more', 'sales', 'sale-detail', 'debts', 'expenses', 'settings'].includes(n)) return 'more'
   return ''

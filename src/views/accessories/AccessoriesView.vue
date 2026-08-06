@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus, Headphones } from 'lucide-vue-next'
+import { Headphones } from 'lucide-vue-next'
 import type { Accessory, AccessoryListQuery, SoldAccessoryListQuery } from '@/api/types'
 import {
   useAccessoriesList,
@@ -23,7 +23,6 @@ import AppButton from '@/components/ui/AppButton.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import AccessoryCard from '@/components/accessories/AccessoryCard.vue'
 import AccessoryFormSheet from '@/components/accessories/AccessoryFormSheet.vue'
-import StockFormSheet from '@/components/accessories/StockFormSheet.vue'
 import SaleSheet from '@/components/sales/SaleSheet.vue'
 import SoldAccessoryCard from '@/components/accessories/SoldAccessoryCard.vue'
 import SoldAccessorySheet from '@/components/accessories/SoldAccessorySheet.vue'
@@ -56,8 +55,6 @@ const showForm = ref(false)
 const editing = ref<Accessory | null>(null)
 const selling = ref<Accessory | null>(null)
 const showSale = ref(false)
-const stocking = ref<Accessory | null>(null)
-const showStock = ref(false)
 const deleting = ref<Accessory | null>(null)
 const showDelete = ref(false)
 const deleteAccessory = useDeleteAccessory()
@@ -66,10 +63,6 @@ const deleteAccessory = useDeleteAccessory()
 const soldId = ref<string | null>(null)
 const showSoldDetail = ref(false)
 
-function add() {
-  editing.value = null
-  showForm.value = true
-}
 function edit(accessory: Accessory) {
   editing.value = accessory
   showForm.value = true
@@ -77,10 +70,6 @@ function edit(accessory: Accessory) {
 function sell(accessory: Accessory) {
   selling.value = accessory
   showSale.value = true
-}
-function addStock(accessory: Accessory) {
-  stocking.value = accessory
-  showStock.value = true
 }
 function askDelete(accessory: Accessory) {
   deleting.value = accessory
@@ -105,14 +94,7 @@ async function confirmDelete() {
 
 <template>
   <div>
-    <PageHeader :title="t('accessories.title')">
-      <template #actions>
-        <AppButton v-if="mode === 'current'" size="sm" @click="add">
-          <template #icon><Plus class="size-4" /></template>
-          {{ t('app.add') }}
-        </AppButton>
-      </template>
-    </PageHeader>
+    <PageHeader :title="t('accessories.title')" />
 
     <PageContainer wide>
       <div class="space-y-3">
@@ -140,10 +122,12 @@ async function confirmDelete() {
           <EmptyState
             :icon="Headphones"
             :title="t('accessories.emptyTitle')"
-            :text="t('accessories.emptyText')"
+            :text="t('accessories.emptyViaReceipt')"
           >
             <template #action>
-              <AppButton @click="add">{{ t('accessories.add') }}</AppButton>
+              <AppButton @click="router.push({ name: 'receipt-new' })">
+                {{ t('receipts.new') }}
+              </AppButton>
             </template>
           </EmptyState>
         </template>
@@ -155,7 +139,6 @@ async function confirmDelete() {
             :accessory="accessory"
             @open="router.push({ name: 'accessory-detail', params: { id: accessory.id } })"
             @sell="sell(accessory)"
-            @stock="addStock(accessory)"
             @edit="edit(accessory)"
             @remove="askDelete(accessory)"
           />
@@ -209,9 +192,8 @@ async function confirmDelete() {
       </DataState>
     </PageContainer>
 
-    <AccessoryFormSheet v-model="showForm" :accessory="editing ?? undefined" />
+    <AccessoryFormSheet v-if="editing" v-model="showForm" :accessory="editing" />
     <SaleSheet v-if="selling" v-model="showSale" :accessory="selling" />
-    <StockFormSheet v-if="stocking" v-model="showStock" :accessory="stocking" />
     <SoldAccessorySheet v-if="soldId" v-model="showSoldDetail" :accessory-id="soldId" />
     <ConfirmDialog
       v-model="showDelete"

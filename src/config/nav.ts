@@ -7,6 +7,7 @@ import {
   History,
   HandCoins,
   Receipt,
+  PackagePlus,
   Settings,
 } from 'lucide-vue-next'
 import { t } from '@/i18n'
@@ -33,6 +34,7 @@ export const sidebarItems: NavItem[] = [
   { name: 'dashboard', label: t('nav.dashboard'), icon: Home },
   { name: 'phones', label: t('nav.phones'), icon: Smartphone },
   { name: 'accessories', label: t('nav.accessories'), icon: Headphones },
+  { name: 'receipts', label: t('nav.receipts'), icon: PackagePlus },
   { name: 'sales', label: t('nav.salesHistory'), icon: History },
   { name: 'debts', label: t('nav.debts'), icon: HandCoins },
   { name: 'expenses', label: t('nav.expenses'), icon: Receipt },
@@ -41,6 +43,7 @@ export const sidebarItems: NavItem[] = [
 
 /** Secondary destinations shown on the mobile "More" screen. */
 export const moreItems: NavItem[] = [
+  { name: 'receipts', label: t('nav.receipts'), icon: PackagePlus },
   { name: 'sales', label: t('nav.salesHistory'), icon: History },
   { name: 'debts', label: t('nav.debts'), icon: HandCoins },
   { name: 'expenses', label: t('nav.expenses'), icon: Receipt },

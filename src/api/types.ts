@@ -222,12 +222,6 @@ export interface StockEntry {
   createdAt: string
 }
 
-export interface AddStockPayload {
-  quantity: number
-  purchasePrice: number
-  note?: string
-}
-
 /** Sold-accessory summary row — `GET /accessories/sold` (one row per accessory). */
 export interface SoldAccessoryRow {
   accessoryId: string
@@ -271,6 +265,76 @@ export interface SoldAccessoryListQuery {
   search?: string
   page?: number
   limit?: number
+}
+
+/* ----------------------------------------------------------------------------
+ * Stock receipts (Kirim / Prixod)
+ *
+ * Document-level accessory intake: one receipt covers many lines at once, can
+ * create brand-new accessories inline, and records a supplier + totals.
+ * ------------------------------------------------------------------------- */
+
+/** One row of `GET /stock-receipts` (list). */
+export interface StockReceiptRow {
+  id: string
+  code: string // "P-000123"
+  supplierName?: string | null
+  supplierPhone?: string | null
+  totalAmount: number // sum of all line totals (UZS)
+  totalQty: number // sum of all quantities
+  itemCount: number // number of lines
+  note?: string | null
+  receivedAt: string // ISO datetime
+}
+
+/** One line within a receipt (present on the detail endpoint). */
+export interface StockReceiptItem {
+  id: string
+  accessoryId: string
+  name: string // accessory name (snapshot-friendly)
+  imageUrl?: string | null
+  quantity: number
+  purchasePrice: number // unit cost of this intake (may be 0 = tekin)
+  lineTotal: number // quantity * purchasePrice
+}
+
+/** `GET /stock-receipts/:id` and the create response — row + its lines. */
+export interface StockReceipt extends StockReceiptRow {
+  items: StockReceiptItem[]
+}
+
+export interface StockReceiptListQuery {
+  search?: string
+  from?: string
+  to?: string
+  page?: number
+  limit?: number
+}
+
+/** New accessory created inline from a receipt line. */
+export interface NewAccessoryInput {
+  name: string
+  salePrice?: number
+  imageUrl?: string
+  note?: string
+}
+
+/**
+ * One line of a create-receipt payload. Exactly ONE of `accessoryId` /
+ * `newAccessory` must be set (both or neither → RECEIPT_LINE_INVALID).
+ */
+export interface CreateStockReceiptLine {
+  accessoryId?: string
+  newAccessory?: NewAccessoryInput
+  quantity: number // positive integer
+  purchasePrice: number // >= 0 (0 = tekin/free)
+}
+
+export interface CreateStockReceiptPayload {
+  supplierName?: string
+  supplierPhone?: string
+  note?: string
+  items: CreateStockReceiptLine[] // at least 1
 }
 
 /* ----------------------------------------------------------------------------

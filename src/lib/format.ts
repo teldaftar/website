@@ -5,6 +5,8 @@ import { formatInTimeZone } from 'date-fns-tz'
 export const APP_TZ = 'Asia/Tashkent'
 
 const SOM = "so'm"
+/** Shown instead of "0 so'm" for a free (tekin) purchase/cost price. */
+const TEKIN = 'Tekin'
 
 /**
  * Format an amount as UZS with thin thousands separators + `so'm` suffix.
@@ -14,6 +16,15 @@ const SOM = "so'm"
 export function formatMoney(n: number | null | undefined): string {
   const value = typeof n === 'number' && Number.isFinite(n) ? n : 0
   return `${groupThousands(Math.round(value))} ${SOM}`
+}
+
+/**
+ * A purchase/cost price for display: `0` reads as "Tekin" (free intake) instead
+ * of "0 so'm"; anything else formats like `formatMoney`. Use wherever an
+ * `purchasePrice` / `costPrice` is shown. Sale/list prices stay money-formatted.
+ */
+export function formatCost(n: number | null | undefined): string {
+  return n === 0 ? TEKIN : formatMoney(n)
 }
 
 /** Grouped number without the currency suffix (for compact/chart contexts). */

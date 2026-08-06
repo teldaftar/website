@@ -4,7 +4,6 @@ import { accessoriesApi } from '@/api/accessories'
 import { usePaginatedList } from './usePaginatedList'
 import type {
   AccessoryListQuery,
-  AddStockPayload,
   CreateAccessoryPayload,
   SoldAccessoryListQuery,
   UpdateAccessoryPayload,
@@ -64,18 +63,5 @@ export function useDeleteAccessory() {
   return useMutation({
     mutationFn: (id: string) => accessoriesApi.remove(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['accessories'] }),
-  })
-}
-
-export function useAddStock() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: AddStockPayload }) =>
-      accessoriesApi.addStock(id, payload),
-    onSuccess: (acc) => {
-      qc.invalidateQueries({ queryKey: ['accessories'] })
-      qc.invalidateQueries({ queryKey: ['accessory', acc.id] })
-      qc.invalidateQueries({ queryKey: ['accessory-stock', acc.id] })
-    },
   })
 }

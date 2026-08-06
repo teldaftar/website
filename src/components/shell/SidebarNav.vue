@@ -16,6 +16,7 @@ function isActive(name: string): boolean {
   const n = currentName.value
   if (name === 'phones') return n.startsWith('phone')
   if (name === 'accessories') return n.startsWith('accessor')
+  if (name === 'receipts') return n.startsWith('receipt')
   if (name === 'sales') return n === 'sales' || n === 'sale-detail'
   return n === name
 }
