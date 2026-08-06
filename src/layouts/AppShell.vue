@@ -1,11 +1,17 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import SidebarNav from '@/components/shell/SidebarNav.vue'
 import TopBar from '@/components/shell/TopBar.vue'
 import BottomNav from '@/components/shell/BottomNav.vue'
 import { transitionName } from '@/lib/transition'
+import { prefetchRoutes } from '@/router/prefetch'
 
 const route = useRoute()
+
+// The shell only mounts for authenticated users — warm the other screens now so
+// switching pages from the menu is instant on the first visit too.
+onMounted(prefetchRoutes)
 </script>
 
 <template>
