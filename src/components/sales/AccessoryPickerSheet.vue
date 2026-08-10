@@ -37,7 +37,8 @@ function added(id: string) {
 // Multiple accessories can be added in one go — the sheet stays open, tapping a
 // selected row removes it. Finish with the footer "Tayyor" button.
 function pick(accessory: Accessory) {
-  emit(added(accessory.id) ? 'remove' : 'select', accessory)
+  if (added(accessory.id)) emit('remove', accessory)
+  else emit('select', accessory)
 }
 </script>
 

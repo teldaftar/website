@@ -39,7 +39,8 @@ function added(id: string) {
 // Multiple phones can be added in one go — the sheet stays open, tapping a
 // selected row removes it. Finish with the footer "Tayyor" button.
 function pick(phone: Phone) {
-  emit(added(phone.id) ? 'remove' : 'select', phone)
+  if (added(phone.id)) emit('remove', phone)
+  else emit('select', phone)
 }
 </script>
 
