@@ -48,6 +48,17 @@ export function mapErrorCode(code: string, details?: Record<string, unknown>): s
 
   const dict = uz.errors as Record<string, string>
 
+  // Sold-stock protection: PATCH /stock-receipts sends `minQuantity` ("must be at
+  // least this many"); other sources may still send `available`.
+  if (code === 'INSUFFICIENT_STOCK' && details) {
+    if (details.minQuantity != null) {
+      return t('errors.INSUFFICIENT_STOCK_MIN', { minQuantity: num(details.minQuantity) })
+    }
+    if (details.available != null) {
+      return t('errors.INSUFFICIENT_STOCK_DETAIL', { available: num(details.available) })
+    }
+  }
+
   if (DETAIL_CODES.has(code) && details) {
     const detailKey = `${code}_DETAIL`
     if (detailKey in dict) {

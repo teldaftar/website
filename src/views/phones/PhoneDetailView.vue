@@ -18,7 +18,6 @@ import Badge from '@/components/ui/Badge.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import PhoneFormSheet from '@/components/phones/PhoneFormSheet.vue'
-import SaleSheet from '@/components/sales/SaleSheet.vue'
 import ReturnSheet from '@/components/sales/ReturnSheet.vue'
 import DebtDetailCard from '@/components/debts/DebtDetailCard.vue'
 import PayDebtSheet from '@/components/debts/PayDebtSheet.vue'
@@ -54,7 +53,6 @@ const hasSupplier = computed(
 
 const showEdit = ref(false)
 const showDelete = ref(false)
-const showSale = ref(false)
 const showReturn = ref(false)
 const showPay = ref(false)
 
@@ -73,7 +71,7 @@ async function onDelete() {
 
 function sell() {
   if (!phone.value) return
-  showSale.value = true
+  router.push({ name: 'sale-new', query: { phoneId: phone.value.id } })
 }
 </script>
 
@@ -273,7 +271,6 @@ function sell() {
     </PageContainer>
 
     <PhoneFormSheet v-if="phone" v-model="showEdit" :phone="phone" />
-    <SaleSheet v-if="phone" v-model="showSale" :phone="phone" />
     <ReturnSheet v-if="returnableSale" v-model="showReturn" :sale="returnableSale" />
     <PayDebtSheet v-if="phone?.debt" v-model="showPay" :debt="phone.debt" @paid="refetch" />
     <ConfirmDialog

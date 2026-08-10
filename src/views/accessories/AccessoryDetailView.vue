@@ -16,7 +16,6 @@ import Badge from '@/components/ui/Badge.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import AccessoryFormSheet from '@/components/accessories/AccessoryFormSheet.vue'
-import SaleSheet from '@/components/sales/SaleSheet.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -28,7 +27,6 @@ const deleteAccessory = useDeleteAccessory()
 
 const showEdit = ref(false)
 const showDelete = ref(false)
-const showSale = ref(false)
 
 const stockTone = computed(() => {
   const q = accessory.value?.quantity ?? 0
@@ -50,7 +48,7 @@ async function onDelete() {
 
 function sell() {
   if (!accessory.value) return
-  showSale.value = true
+  router.push({ name: 'sale-new', query: { accessoryId: accessory.value.id } })
 }
 </script>
 
@@ -112,7 +110,12 @@ function sell() {
 
           <!-- Actions -->
           <div class="grid grid-cols-2 gap-3">
-            <AppButton size="lg" class="col-span-2" @click="sell">
+            <AppButton
+              v-if="accessory.quantity > 0"
+              size="lg"
+              class="col-span-2"
+              @click="sell"
+            >
               <template #icon><ShoppingCart class="size-5" /></template>
               {{ t('accessories.sell') }}
             </AppButton>
@@ -142,6 +145,10 @@ function sell() {
                   <p class="font-semibold text-fg">
                     +{{ formatNumber(entry.quantity) }} {{ t('accessories.unit') }}
                   </p>
+                  <p class="text-xs text-fg-muted tnum">
+                    {{ t('accessories.remaining') }}:
+                    {{ formatNumber(entry.remainingQuantity) }} {{ t('accessories.unit') }}
+                  </p>
                   <p v-if="entry.note" class="truncate text-xs text-fg-muted">{{ entry.note }}</p>
                 </div>
                 <div class="text-right">
@@ -159,7 +166,6 @@ function sell() {
     </PageContainer>
 
     <AccessoryFormSheet v-if="accessory" v-model="showEdit" :accessory="accessory" />
-    <SaleSheet v-if="accessory" v-model="showSale" :accessory="accessory" />
     <ConfirmDialog
       v-model="showDelete"
       :title="t('accessories.deleteConfirm')"

@@ -68,6 +68,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/sales/SalesHistoryView.vue'),
       },
       {
+        path: 'sales/new',
+        name: 'sale-new',
+        component: () => import('@/views/sales/NewSaleView.vue'),
+      },
+      {
         path: 'sales/:id',
         name: 'sale-detail',
         component: () => import('@/views/sales/SaleDetailView.vue'),

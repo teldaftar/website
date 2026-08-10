@@ -1,4 +1,4 @@
-import { toValue, type MaybeRefOrGetter } from 'vue'
+import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { accessoriesApi } from '@/api/accessories'
 import { usePaginatedList } from './usePaginatedList'
@@ -35,6 +35,15 @@ export function useStockHistory(id: MaybeRefOrGetter<string>) {
   return useQuery({
     queryKey: ['accessory-stock', id],
     queryFn: () => accessoriesApi.stockHistory(toValue(id)),
+  })
+}
+
+/** Only the FIFO batches that still have stock — for the sale batch picker. */
+export function useAvailableStock(id: MaybeRefOrGetter<string | null | undefined>) {
+  return useQuery({
+    queryKey: ['accessory-stock', 'available', id],
+    enabled: computed(() => !!toValue(id)),
+    queryFn: () => accessoriesApi.stockHistory(toValue(id) as string, { available: true }),
   })
 }
 

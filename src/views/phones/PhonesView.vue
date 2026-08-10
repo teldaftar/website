@@ -20,7 +20,6 @@ import AppButton from '@/components/ui/AppButton.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import PhoneCard from '@/components/phones/PhoneCard.vue'
 import PhoneFormSheet from '@/components/phones/PhoneFormSheet.vue'
-import SaleSheet from '@/components/sales/SaleSheet.vue'
 
 const router = useRouter()
 
@@ -81,8 +80,6 @@ function toggleOrder() {
 // Sheets / dialogs operate on a selected phone straight from the list.
 const showForm = ref(false)
 const editing = ref<Phone | null>(null)
-const selling = ref<Phone | null>(null)
-const showSale = ref(false)
 const deleting = ref<Phone | null>(null)
 const showDelete = ref(false)
 const deletePhone = useDeletePhone()
@@ -96,8 +93,8 @@ function edit(phone: Phone) {
   showForm.value = true
 }
 function sell(phone: Phone) {
-  selling.value = phone
-  showSale.value = true
+  // Selling is a cart flow now — hand off to the new-sale page with this phone pre-added.
+  router.push({ name: 'sale-new', query: { phoneId: phone.id } })
 }
 function askDelete(phone: Phone) {
   deleting.value = phone
@@ -194,7 +191,6 @@ async function confirmDelete() {
     </PageContainer>
 
     <PhoneFormSheet v-model="showForm" :phone="editing ?? undefined" />
-    <SaleSheet v-if="selling" v-model="showSale" :phone="selling" />
     <ConfirmDialog
       v-model="showDelete"
       :title="t('phones.deleteConfirm')"

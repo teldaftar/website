@@ -27,8 +27,10 @@ export const accessoriesApi = {
   remove(id: string) {
     return api.delete(`/accessories/${id}`).then((r) => r.data)
   },
-  stockHistory(id: string) {
-    return api.get<StockEntry[]>(`/accessories/${id}/stock`).then((r) => r.data)
+  // `available: true` returns only batches with remaining stock (for the sale picker);
+  // omit it for the full intake history on the detail page.
+  stockHistory(id: string, params?: { available?: boolean }) {
+    return api.get<StockEntry[]>(`/accessories/${id}/stock`, { params }).then((r) => r.data)
   },
   sold(query: SoldAccessoryListQuery) {
     return api

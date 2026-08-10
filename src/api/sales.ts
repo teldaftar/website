@@ -2,6 +2,7 @@ import { api } from './http'
 import type {
   CreateAccessorySalePayload,
   CreatePhoneSalePayload,
+  CreateSalePayload,
   Paginated,
   ReturnPayload,
   Sale,
@@ -15,6 +16,10 @@ export const salesApi = {
   },
   get(id: string) {
     return api.get<Sale>(`/sales/${id}`).then((r) => r.data)
+  },
+  /** Cart-style multi-item sale (phones + accessories in one document). */
+  create(payload: CreateSalePayload) {
+    return api.post<Sale>('/sales', payload).then((r) => r.data)
   },
   createPhoneSale(payload: CreatePhoneSalePayload) {
     return api.post<Sale>('/sales/phone', payload).then((r) => r.data)

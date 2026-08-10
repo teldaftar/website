@@ -13,6 +13,8 @@ const item = computed(() => props.sale.items[0])
 const product = computed(() => item.value?.product)
 const image = computed(() => resolveImageUrl(product.value?.imageUrl))
 const subtitle = computed(() => {
+  // Multi-item / mixed sale: summarise by count instead of the first product's specs.
+  if (props.sale.items.length > 1) return t('sales.itemCount', { n: props.sale.items.length })
   const p = product.value
   if (!p) return ''
   if (props.sale.type === 'ACCESSORY')

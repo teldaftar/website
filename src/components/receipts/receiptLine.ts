@@ -23,6 +23,8 @@ export interface ReceiptRowState {
   /** Editable. */
   quantity: string
   purchasePrice: number | null
+  /** Optional sale price to set on the accessory (auto-fills the sale page later). */
+  salePrice: number | null
 }
 
 export function rowFromAccessory(key: number, acc: Accessory): ReceiptRowState {
@@ -36,6 +38,8 @@ export function rowFromAccessory(key: number, acc: Accessory): ReceiptRowState {
     quantity: '',
     // Prefill with the accessory's last cost (may be 0 = tekin).
     purchasePrice: acc.purchasePrice,
+    // Prefill with the accessory's current sale price; editing it updates the catalog.
+    salePrice: acc.salePrice ?? null,
   }
 }
 
@@ -50,6 +54,8 @@ export function rowFromReceiptItem(key: number, item: StockReceiptItem): Receipt
     currentQuantity: null,
     quantity: String(item.quantity),
     purchasePrice: item.purchasePrice,
+    // The saved receipt line carries no sale price — leave blank in edit mode.
+    salePrice: null,
   }
 }
 
@@ -63,6 +69,7 @@ export function rowFromNew(key: number, input: NewAccessoryInput): ReceiptRowSta
     currentQuantity: null,
     quantity: '',
     purchasePrice: null,
+    salePrice: input.salePrice ?? null,
   }
 }
 
@@ -84,10 +91,16 @@ export function rowComplete(r: ReceiptRowState): boolean {
   return !!r.accessoryId || !!r.newAccessory
 }
 
-/** Convert a completed row into the API payload line. */
+/**
+ * Convert a completed row into the API payload line. A sale price (when entered)
+ * updates the accessory's catalog price: line-level for an existing accessory,
+ * or inside `newAccessory.salePrice` for a brand-new one. Omitted → price unchanged.
+ */
 export function toPayloadLine(r: ReceiptRowState): CreateStockReceiptLine {
+  const salePrice = r.salePrice != null && r.salePrice >= 0 ? r.salePrice : undefined
   const base = { quantity: rowQty(r), purchasePrice: r.purchasePrice as number }
-  return r.accessoryId
-    ? { ...base, accessoryId: r.accessoryId }
-    : { ...base, newAccessory: r.newAccessory as NewAccessoryInput }
+  if (r.accessoryId) {
+    return { ...base, accessoryId: r.accessoryId, ...(salePrice != null && { salePrice }) }
+  }
+  return { ...base, newAccessory: { ...(r.newAccessory as NewAccessoryInput), salePrice } }
 }

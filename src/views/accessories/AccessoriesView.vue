@@ -23,7 +23,6 @@ import AppButton from '@/components/ui/AppButton.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import AccessoryCard from '@/components/accessories/AccessoryCard.vue'
 import AccessoryFormSheet from '@/components/accessories/AccessoryFormSheet.vue'
-import SaleSheet from '@/components/sales/SaleSheet.vue'
 import SoldAccessoryCard from '@/components/accessories/SoldAccessoryCard.vue'
 import SoldAccessorySheet from '@/components/accessories/SoldAccessorySheet.vue'
 
@@ -53,8 +52,6 @@ const sold = useSoldAccessoriesList(soldQuery)
 // Sheets / dialogs (current mode) operate on a selected accessory.
 const showForm = ref(false)
 const editing = ref<Accessory | null>(null)
-const selling = ref<Accessory | null>(null)
-const showSale = ref(false)
 const deleting = ref<Accessory | null>(null)
 const showDelete = ref(false)
 const deleteAccessory = useDeleteAccessory()
@@ -68,8 +65,8 @@ function edit(accessory: Accessory) {
   showForm.value = true
 }
 function sell(accessory: Accessory) {
-  selling.value = accessory
-  showSale.value = true
+  // Selling is a cart flow now — open the new-sale page and jump to this accessory's batches.
+  router.push({ name: 'sale-new', query: { accessoryId: accessory.id } })
 }
 function askDelete(accessory: Accessory) {
   deleting.value = accessory
@@ -193,7 +190,6 @@ async function confirmDelete() {
     </PageContainer>
 
     <AccessoryFormSheet v-if="editing" v-model="showForm" :accessory="editing" />
-    <SaleSheet v-if="selling" v-model="showSale" :accessory="selling" />
     <SoldAccessorySheet v-if="soldId" v-model="showSoldDetail" :accessory-id="soldId" />
     <ConfirmDialog
       v-model="showDelete"

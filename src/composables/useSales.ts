@@ -5,6 +5,7 @@ import { usePaginatedList } from './usePaginatedList'
 import type {
   CreateAccessorySalePayload,
   CreatePhoneSalePayload,
+  CreateSalePayload,
   Phone,
   ReturnPayload,
   Sale,
@@ -82,8 +83,19 @@ function invalidateAfterSale(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: ['accessories'] })
   qc.invalidateQueries({ queryKey: ['accessories-sold'] })
   qc.invalidateQueries({ queryKey: ['accessory-sold'] })
+  // Remaining per-batch stock changes on every sale — refresh the batch picker/history.
+  qc.invalidateQueries({ queryKey: ['accessory-stock'] })
   qc.invalidateQueries({ queryKey: ['debts'] })
   qc.invalidateQueries({ queryKey: ['statistics'] })
+}
+
+/** Cart-style multi-item sale (`POST /sales`). */
+export function useCreateSale() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: CreateSalePayload) => salesApi.create(payload),
+    onSuccess: () => invalidateAfterSale(qc),
+  })
 }
 
 export function useCreatePhoneSale() {

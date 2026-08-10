@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Receipt } from 'lucide-vue-next'
+import { Receipt, Plus } from 'lucide-vue-next'
 import type { SaleListQuery, SaleType } from '@/api/types'
 import { useSalesList } from '@/composables/useSales'
 import { toUserMessage } from '@/api/errors'
@@ -9,6 +9,7 @@ import { currentMonthRange } from '@/lib/format'
 import { t } from '@/i18n'
 import PageHeader from '@/components/shell/PageHeader.vue'
 import PageContainer from '@/components/shell/PageContainer.vue'
+import AppButton from '@/components/ui/AppButton.vue'
 import Segmented from '@/components/ui/Segmented.vue'
 import SearchBar from '@/components/ui/SearchBar.vue'
 import DateRangePicker, { type DateRange } from '@/components/ui/DateRangePicker.vue'
@@ -20,12 +21,13 @@ import SaleRow from '@/components/sales/SaleRow.vue'
 
 const router = useRouter()
 
-const type = ref<SaleType>('PHONE')
+// 'ALL' = no type filter, so mixed (phone + accessory) sales are visible too.
+const type = ref<SaleType | 'ALL'>('ALL')
 const range = ref<DateRange>(currentMonthRange())
 const filters = reactive({ search: '', isDebt: false })
 
 const query = computed<SaleListQuery>(() => ({
-  type: type.value,
+  type: type.value === 'ALL' ? undefined : type.value,
   from: range.value.from,
   to: range.value.to,
   search: filters.search.trim() || undefined,
@@ -44,6 +46,7 @@ const {
 } = useSalesList(query)
 
 const typeOptions = [
+  { label: t('sales.tabAll'), value: 'ALL' as const },
   { label: t('sales.tabPhones'), value: 'PHONE' as const },
   { label: t('sales.tabAccessories'), value: 'ACCESSORY' as const },
 ]
@@ -51,7 +54,14 @@ const typeOptions = [
 
 <template>
   <div>
-    <PageHeader :title="t('sales.history')" back />
+    <PageHeader :title="t('sales.history')" back>
+      <template #actions>
+        <AppButton size="sm" @click="router.push({ name: 'sale-new' })">
+          <template #icon><Plus class="size-4" /></template>
+          {{ t('sales.title') }}
+        </AppButton>
+      </template>
+    </PageHeader>
     <PageContainer>
       <div class="space-y-3">
         <Segmented v-model="type" :options="typeOptions" />

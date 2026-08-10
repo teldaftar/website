@@ -185,6 +185,10 @@ export interface PhoneLabel {
 export interface Accessory {
   id: string
   name: string
+  /**
+   * Cost of the OLDEST remaining FIFO batch — i.e. the price the next unit sold
+   * will be costed at ("hozir shu narxdan sotilyapti"). 0 = tekin.
+   */
   purchasePrice: number
   salePrice?: number | null
   quantity: number
@@ -217,6 +221,8 @@ export type UpdateAccessoryPayload = Partial<
 export interface StockEntry {
   id: string
   quantity: number
+  /** How many units from THIS batch are still unsold (FIFO). */
+  remainingQuantity: number
   purchasePrice: number
   note?: string | null
   createdAt: string
@@ -294,6 +300,8 @@ export interface StockReceiptItem {
   name: string // accessory name (snapshot-friendly)
   imageUrl?: string | null
   quantity: number
+  /** How many units from THIS receipt line are still unsold (FIFO). */
+  remaining: number
   purchasePrice: number // unit cost of this intake (may be 0 = tekin)
   lineTotal: number // quantity * purchasePrice
 }
@@ -328,6 +336,12 @@ export interface CreateStockReceiptLine {
   newAccessory?: NewAccessoryInput
   quantity: number // positive integer
   purchasePrice: number // >= 0 (0 = tekin/free)
+  /**
+   * Optional sale price to set on the accessory this intake feeds. For an existing
+   * accessory it updates the catalog price; for a new one it also rides inside
+   * `newAccessory.salePrice`. Omit to leave the price unchanged.
+   */
+  salePrice?: number
 }
 
 export interface CreateStockReceiptPayload {
@@ -341,7 +355,8 @@ export interface CreateStockReceiptPayload {
  * Sales
  * ------------------------------------------------------------------------- */
 
-export type SaleType = 'PHONE' | 'ACCESSORY'
+/** MIXED = a single sale that contains both phones and accessories. */
+export type SaleType = 'PHONE' | 'ACCESSORY' | 'MIXED'
 export type SaleStatus = 'COMPLETED' | 'PARTIALLY_RETURNED' | 'RETURNED'
 
 export interface DebtInput {
@@ -448,6 +463,34 @@ export interface CreateAccessorySalePayload {
   /** Optional; on a debt sale, backend fills these from the debt customer when omitted. */
   customerName?: string
   customerPhone?: string
+}
+
+/**
+ * Cart-style multi-item sale (`POST /sales`). One sale may mix phones and
+ * accessories. Each accessory line names the exact FIFO batch (`stockEntryId`)
+ * the seller chose to sell from.
+ */
+export interface CreateSalePhoneLine {
+  type: 'PHONE'
+  phoneId: string
+  unitPrice: number
+}
+export interface CreateSaleAccessoryLine {
+  type: 'ACCESSORY'
+  accessoryId: string
+  stockEntryId: string
+  quantity: number
+  unitPrice: number
+}
+export type CreateSaleLine = CreateSalePhoneLine | CreateSaleAccessoryLine
+
+export interface CreateSalePayload {
+  items: CreateSaleLine[] // at least 1
+  note?: string
+  /** Optional; on a debt sale, backend fills these from the debt customer when omitted. */
+  customerName?: string
+  customerPhone?: string
+  debt?: DebtInput
 }
 
 export interface ReturnPayload {

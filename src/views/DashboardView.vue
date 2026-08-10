@@ -11,6 +11,7 @@ import {
   ChevronRight,
   AlertTriangle,
   HandCoins,
+  ShoppingCart,
 } from 'lucide-vue-next'
 import { useStatisticsSummary, useDailyStats } from '@/composables/useStatistics'
 import { toUserMessage } from '@/api/errors'
@@ -25,6 +26,7 @@ import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
 import StatTile from '@/components/ui/StatTile.vue'
 import Card from '@/components/ui/Card.vue'
 import StatChart from '@/components/dashboard/StatChart.vue'
+import AppButton from '@/components/ui/AppButton.vue'
 
 const router = useRouter()
 const range = ref<DateRange>(currentMonthRange())
@@ -44,6 +46,11 @@ function refresh() {
   <div>
     <PageHeader :title="t('dashboard.title')" />
     <PageContainer wide>
+      <AppButton size="lg" block class="mb-4" @click="router.push({ name: 'sale-new' })">
+        <template #icon><ShoppingCart class="size-5" /></template>
+        {{ t('sales.title') }}
+      </AppButton>
+
       <div class="mb-4">
         <DateRangePicker v-model="range" />
       </div>

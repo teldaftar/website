@@ -100,7 +100,7 @@ async function onSubmit() {
     notify.success(isEdit.value ? t('settings.saved') : t('receipts.saved'))
     router.replace({ name: 'receipt-detail', params: { id: saved.id } })
   } catch (err) {
-    // Covers INSUFFICIENT_STOCK (with details.available — sold-stock protection).
+    // Covers INSUFFICIENT_STOCK (PATCH sends details.minQuantity — sold-stock protection).
     notify.error(toUserMessage(err))
   } finally {
     submitting.value = false

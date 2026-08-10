@@ -41,7 +41,7 @@ async function onDelete() {
     notify.success(t('app.delete'))
     router.replace({ name: 'receipts' })
   } catch (err) {
-    // Covers INSUFFICIENT_STOCK (sold-stock protection) with details.available.
+    // Covers INSUFFICIENT_STOCK (sold-stock protection): delete keeps the old shape.
     notify.error(toUserMessage(err))
   } finally {
     showDelete.value = false
@@ -156,6 +156,10 @@ async function onDelete() {
                       <Badge tone="success">{{ formatCost(0) }}</Badge>
                     </template>
                     <template v-else>{{ formatMoney(item.purchasePrice) }}</template>
+                  </p>
+                  <p class="text-xs text-fg-muted tnum">
+                    {{ t('accessories.remaining') }}: {{ formatNumber(item.remaining) }}
+                    {{ t('accessories.unit') }}
                   </p>
                 </div>
                 <p class="shrink-0 font-semibold text-fg tnum">{{ formatMoney(item.lineTotal) }}</p>

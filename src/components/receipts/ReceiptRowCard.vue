@@ -51,6 +51,13 @@ defineEmits<{ remove: [] }>()
         :label="t('receipts.purchasePrice')"
         :hint="t('receipts.freeHint')"
       />
+      <!-- Sale price sets/updates the accessory's catalog price (existing rows prefill it). -->
+      <MoneyInput
+        v-model="row.salePrice"
+        class="col-span-2"
+        :label="t('receipts.salePrice')"
+        :hint="t('app.optional')"
+      />
     </div>
 
     <p class="mt-2 text-right text-sm text-fg-muted">
