@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive } from 'vue'
-import { Headphones } from 'lucide-vue-next'
+import { Headphones, Check } from 'lucide-vue-next'
 import type { Accessory, AccessoryListQuery } from '@/api/types'
 import { useAccessoriesList } from '@/composables/useAccessories'
 import { formatCost, formatNumber, resolveImageUrl } from '@/lib/format'
@@ -12,11 +12,14 @@ import DataState from '@/components/ui/DataState.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
 import InfiniteSentinel from '@/components/ui/InfiniteSentinel.vue'
+import AppButton from '@/components/ui/AppButton.vue'
 
 const open = defineModel<boolean>({ required: true })
-const emit = defineEmits<{ select: [accessory: Accessory] }>()
-/** ids already in the cart — disabled so the same accessory isn't added twice. */
+const emit = defineEmits<{ select: [accessory: Accessory]; remove: [accessory: Accessory] }>()
+/** ids already in the cart — shown as selected; tapping again removes them. */
 const props = defineProps<{ addedIds?: string[] }>()
+
+const selectedCount = computed(() => props.addedIds?.length ?? 0)
 
 const filters = reactive({ search: '' })
 const query = computed<AccessoryListQuery>(() => ({
@@ -31,10 +34,10 @@ function added(id: string) {
   return props.addedIds?.includes(id) ?? false
 }
 
+// Multiple accessories can be added in one go — the sheet stays open, tapping a
+// selected row removes it. Finish with the footer "Tayyor" button.
 function pick(accessory: Accessory) {
-  if (added(accessory.id)) return
-  emit('select', accessory)
-  open.value = false
+  emit(added(accessory.id) ? 'remove' : 'select', accessory)
 }
 </script>
 
@@ -65,8 +68,12 @@ function pick(accessory: Accessory) {
             v-for="accessory in items"
             :key="accessory.id"
             type="button"
-            class="flex w-full items-center gap-3 rounded-xl border border-border bg-surface p-2.5 text-left transition-colors enabled:hover:bg-surface-2 disabled:opacity-45"
-            :disabled="added(accessory.id)"
+            class="flex w-full items-center gap-3 rounded-xl border p-2.5 text-left transition-colors"
+            :class="
+              added(accessory.id)
+                ? 'border-primary bg-primary-soft'
+                : 'border-border bg-surface hover:bg-surface-2'
+            "
             @click="pick(accessory)"
           >
             <div
@@ -87,9 +94,18 @@ function pick(accessory: Accessory) {
                 {{ t('accessories.remaining').toLowerCase() }}
               </p>
             </div>
-            <p v-if="accessory.salePrice" class="shrink-0 text-sm font-semibold text-fg tnum">
+            <p
+              v-if="accessory.salePrice && !added(accessory.id)"
+              class="shrink-0 text-sm font-semibold text-fg tnum"
+            >
               {{ formatCost(accessory.salePrice) }}
             </p>
+            <span
+              v-if="added(accessory.id)"
+              class="grid size-6 shrink-0 place-items-center rounded-full bg-primary text-primary-fg"
+            >
+              <Check class="size-4" :stroke-width="3" />
+            </span>
           </button>
 
           <InfiniteSentinel
@@ -99,6 +115,13 @@ function pick(accessory: Accessory) {
           />
         </div>
       </DataState>
+
+      <div class="sticky bottom-0 -mx-5 -mb-6 border-t border-border bg-surface px-5 pt-3 pb-6 lg:-mb-5 lg:pb-5">
+        <AppButton block size="lg" @click="open = false">
+          <template #icon><Check class="size-5" /></template>
+          {{ selectedCount ? t('sales.pickDoneCount', { n: selectedCount }) : t('sales.pickDone') }}
+        </AppButton>
+      </div>
     </div>
   </ModalSheet>
 </template>

@@ -99,6 +99,16 @@ function onAccessory(accessory: Accessory) {
   void addAccessoryLine(accessory)
 }
 
+// Tapping a selected row in a picker removes its cart line.
+function onPhoneRemove(phone: Phone) {
+  const line = lines.value.find((l) => l.type === 'PHONE' && l.phone.id === phone.id)
+  if (line) cart.remove(line.key)
+}
+function onAccessoryRemove(accessory: Accessory) {
+  const line = lines.value.find((l) => l.type === 'ACCESSORY' && l.accessory.id === accessory.id)
+  if (line) cart.remove(line.key)
+}
+
 function submit() {
   Object.keys(errors).forEach((k) => delete errors[k])
   Object.assign(errors, validateDebt(debt, total.value))
@@ -380,11 +390,17 @@ function openReceipt() {
       </div>
     </PageContainer>
 
-    <PhonePickerSheet v-model="showPhonePicker" :added-ids="addedPhoneIds" @select="onPhone" />
+    <PhonePickerSheet
+      v-model="showPhonePicker"
+      :added-ids="addedPhoneIds"
+      @select="onPhone"
+      @remove="onPhoneRemove"
+    />
     <AccessoryPickerSheet
       v-model="showAccessoryPicker"
       :added-ids="addedAccessoryIds"
       @select="onAccessory"
+      @remove="onAccessoryRemove"
     />
   </div>
 </template>

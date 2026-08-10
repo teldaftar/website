@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive } from 'vue'
-import { Smartphone } from 'lucide-vue-next'
+import { Smartphone, Check } from 'lucide-vue-next'
 import type { Phone, PhoneListQuery } from '@/api/types'
 import { usePhonesList } from '@/composables/usePhones'
 import { formatMoney, formatMemory, resolveImageUrl } from '@/lib/format'
@@ -12,11 +12,14 @@ import DataState from '@/components/ui/DataState.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
 import InfiniteSentinel from '@/components/ui/InfiniteSentinel.vue'
+import AppButton from '@/components/ui/AppButton.vue'
 
 const open = defineModel<boolean>({ required: true })
-const emit = defineEmits<{ select: [phone: Phone] }>()
-/** ids already in the cart — shown as disabled so the same phone isn't added twice. */
+const emit = defineEmits<{ select: [phone: Phone]; remove: [phone: Phone] }>()
+/** ids already in the cart — shown as selected; tapping again removes them. */
 const props = defineProps<{ addedIds?: string[] }>()
+
+const selectedCount = computed(() => props.addedIds?.length ?? 0)
 
 const filters = reactive({ search: '' })
 const query = computed<PhoneListQuery>(() => ({
@@ -33,10 +36,10 @@ function added(id: string) {
   return props.addedIds?.includes(id) ?? false
 }
 
+// Multiple phones can be added in one go — the sheet stays open, tapping a
+// selected row removes it. Finish with the footer "Tayyor" button.
 function pick(phone: Phone) {
-  if (added(phone.id)) return
-  emit('select', phone)
-  open.value = false
+  emit(added(phone.id) ? 'remove' : 'select', phone)
 }
 </script>
 
@@ -67,8 +70,12 @@ function pick(phone: Phone) {
             v-for="phone in items"
             :key="phone.id"
             type="button"
-            class="flex w-full items-center gap-3 rounded-xl border border-border bg-surface p-2.5 text-left transition-colors enabled:hover:bg-surface-2 disabled:opacity-45"
-            :disabled="added(phone.id)"
+            class="flex w-full items-center gap-3 rounded-xl border p-2.5 text-left transition-colors"
+            :class="
+              added(phone.id)
+                ? 'border-primary bg-primary-soft'
+                : 'border-border bg-surface hover:bg-surface-2'
+            "
             @click="pick(phone)"
           >
             <div
@@ -88,9 +95,15 @@ function pick(phone: Phone) {
                 {{ formatMemory(phone.ramGb, phone.storageGb) || phone.imei || '—' }}
               </p>
             </div>
-            <p class="shrink-0 text-sm font-semibold text-fg tnum">
+            <p v-if="!added(phone.id)" class="shrink-0 text-sm font-semibold text-fg tnum">
               {{ formatMoney(phone.listPrice ?? phone.purchasePrice) }}
             </p>
+            <span
+              v-else
+              class="grid size-6 shrink-0 place-items-center rounded-full bg-primary text-primary-fg"
+            >
+              <Check class="size-4" :stroke-width="3" />
+            </span>
           </button>
 
           <InfiniteSentinel
@@ -100,6 +113,13 @@ function pick(phone: Phone) {
           />
         </div>
       </DataState>
+
+      <div class="sticky bottom-0 -mx-5 -mb-6 border-t border-border bg-surface px-5 pt-3 pb-6 lg:-mb-5 lg:pb-5">
+        <AppButton block size="lg" @click="open = false">
+          <template #icon><Check class="size-5" /></template>
+          {{ selectedCount ? t('sales.pickDoneCount', { n: selectedCount }) : t('sales.pickDone') }}
+        </AppButton>
+      </div>
     </div>
   </ModalSheet>
 </template>

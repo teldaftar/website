@@ -208,6 +208,8 @@ export const uz = {
     pickPhone: 'Telefonni tanlang',
     pickAccessory: 'Aksessuarni tanlang',
     pickBatch: 'Partiyani tanlang',
+    pickDone: 'Tayyor',
+    pickDoneCount: 'Tayyor · {n} ta',
     noBatches: 'Sotuvga partiya qolmagan',
     cash: 'Naqd',
     cart: 'Savat',
