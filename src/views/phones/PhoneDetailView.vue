@@ -245,12 +245,13 @@ function editSalePrice() {
               {{ t('phones.sell') }}
             </AppButton>
 
-            <!-- Edit info + print label are only for in-stock phones. -->
-            <AppButton v-if="inStock" variant="secondary" @click="showEdit = true">
+            <!-- Edit phone info: allowed for sold phones too. -->
+            <AppButton variant="secondary" @click="showEdit = true">
               <template #icon><Pencil class="size-4" /></template>
               {{ t('app.edit') }}
             </AppButton>
 
+            <!-- Print label stays in-stock only. -->
             <AppButton
               v-if="inStock"
               variant="secondary"

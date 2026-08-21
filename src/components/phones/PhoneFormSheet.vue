@@ -24,7 +24,6 @@ const createPhone = useCreatePhone()
 const updatePhone = useUpdatePhone()
 
 const isEdit = () => !!props.phone
-const isSold = () => props.phone?.status === 'SOLD'
 
 interface FormState {
   name: string
@@ -114,14 +113,11 @@ watch(
 
 function validate(): boolean {
   Object.keys(errors).forEach((k) => delete errors[k])
-  // On a sold phone only note/image are editable, so skip the locked fields.
-  if (!isSold()) {
-    if (!form.name.trim()) errors.name = t('validation.required')
-    // IMEI is optional free-form text now — no format rule.
-    // Purchase price may be 0 (tekin — free intake); only null / negative is invalid.
-    if (form.purchasePrice == null || form.purchasePrice < 0)
-      errors.purchasePrice = t('validation.required')
-  }
+  if (!form.name.trim()) errors.name = t('validation.required')
+  // IMEI is optional free-form text now — no format rule.
+  // Purchase price may be 0 (tekin — free intake); only null / negative is invalid.
+  if (form.purchasePrice == null || form.purchasePrice < 0)
+    errors.purchasePrice = t('validation.required')
   return Object.keys(errors).length === 0
 }
 
@@ -136,16 +132,6 @@ async function onSubmit() {
   if (!validate()) return
   submitting.value = true
   try {
-    if (isSold() && props.phone) {
-      // Sold: only note + image may change.
-      const updated = await updatePhone.mutateAsync({
-        id: props.phone.id,
-        payload: { note: form.note || null, imageUrl: form.imageUrl },
-      })
-      finish(updated, t('settings.saved'))
-      return
-    }
-
     const payload: CreatePhonePayload = {
       name: form.name.trim(),
       // Omit IMEI when empty (optional field).
@@ -205,45 +191,24 @@ function handleError(err: unknown) {
 <template>
   <ModalSheet v-model="open" :title="isEdit() ? t('phones.edit') : t('phones.add')">
     <form class="space-y-4" novalidate @submit.prevent="onSubmit">
-      <p v-if="isSold()" class="rounded-lg bg-warning-soft px-3 py-2 text-sm text-warning">
-        {{ t('phones.soldEditNote') }}
-      </p>
-
-      <AppInput
-        v-model="form.name"
-        :label="t('phones.name')"
-        :error="errors.name"
-        :disabled="isSold()"
-      />
+      <AppInput v-model="form.name" :label="t('phones.name')" :error="errors.name" />
       <AppInput
         v-model="form.imei"
         :label="t('phones.imei')"
         :error="errors.imei"
         :hint="t('app.optional')"
-        :disabled="isSold()"
       />
       <MoneyInput
         v-model="form.purchasePrice"
         :label="t('phones.purchasePrice')"
         :error="errors.purchasePrice"
         :hint="t('receipts.freeHint')"
-        :disabled="isSold()"
       />
-      <MoneyInput v-model="form.listPrice" :label="t('phones.listPrice')" :disabled="isSold()" />
+      <MoneyInput v-model="form.listPrice" :label="t('phones.listPrice')" />
 
       <div class="grid grid-cols-2 gap-3">
-        <AppInput
-          v-model="form.ramGb"
-          :label="t('phones.ram')"
-          inputmode="numeric"
-          :disabled="isSold()"
-        />
-        <AppInput
-          v-model="form.storageGb"
-          :label="t('phones.storage')"
-          inputmode="numeric"
-          :disabled="isSold()"
-        />
+        <AppInput v-model="form.ramGb" :label="t('phones.ram')" inputmode="numeric" />
+        <AppInput v-model="form.storageGb" :label="t('phones.storage')" inputmode="numeric" />
       </div>
 
       <AppSelect
@@ -251,7 +216,6 @@ function handleError(err: unknown) {
         :label="t('phones.condition')"
         :options="conditionOptions"
         :placeholder="t('app.all')"
-        :disabled="isSold()"
       />
 
       <AppSelect
@@ -260,7 +224,6 @@ function handleError(err: unknown) {
         :label="t('phones.usedGrade')"
         :options="usedGradeOptions"
         :placeholder="t('app.all')"
-        :disabled="isSold()"
       />
 
       <label
@@ -269,7 +232,7 @@ function handleError(err: unknown) {
         <span class="font-medium text-fg">{{
           form.hasBox ? t('phones.hasBoxYes') : t('phones.hasBoxNo')
         }}</span>
-        <Toggle v-model="form.hasBox" :disabled="isSold()" />
+        <Toggle v-model="form.hasBox" />
       </label>
 
       <label
@@ -278,7 +241,7 @@ function handleError(err: unknown) {
         <span class="font-medium text-fg">{{
           form.hasCharger ? t('phones.hasChargerYes') : t('phones.hasChargerNo')
         }}</span>
-        <Toggle v-model="form.hasCharger" :disabled="isSold()" />
+        <Toggle v-model="form.hasCharger" />
       </label>
 
       <AppTextarea v-model="form.note" :label="t('phones.note')" :rows="2" />
@@ -288,23 +251,14 @@ function handleError(err: unknown) {
       <fieldset class="space-y-3 rounded-2xl border border-border bg-surface-2/40 p-4">
         <legend class="px-1 text-sm font-medium text-fg-muted">{{ t('phones.supplier') }}</legend>
         <div class="grid grid-cols-2 gap-3">
-          <AppInput
-            v-model="form.supplierName"
-            :label="t('phones.supplierName')"
-            :disabled="isSold()"
-          />
-          <AppInput
-            v-model="form.supplierSurname"
-            :label="t('phones.supplierSurname')"
-            :disabled="isSold()"
-          />
+          <AppInput v-model="form.supplierName" :label="t('phones.supplierName')" />
+          <AppInput v-model="form.supplierSurname" :label="t('phones.supplierSurname')" />
         </div>
         <AppInput
           v-model="form.supplierPhone"
           :label="t('phones.supplierPhone')"
           inputmode="tel"
           placeholder="998 90 123 45 67"
-          :disabled="isSold()"
         />
       </fieldset>
 

@@ -111,10 +111,17 @@ const inStock = computed(() => props.phone.status === 'IN_STOCK')
       </button>
     </div>
 
-    <!-- Sold phones: edit the sale price (routes to the sale page in edit mode). -->
-    <div v-else class="mt-3 border-t border-border pt-3">
+    <!-- Sold phones: edit phone info + edit the sale price (→ sale page in edit mode). -->
+    <div v-else class="mt-3 flex items-center gap-2 border-t border-border pt-3">
       <button
-        class="flex w-full items-center justify-center gap-2 rounded-lg border border-border py-2 text-sm font-medium text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
+        class="grid size-9 shrink-0 place-items-center rounded-lg border border-border text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
+        :aria-label="t('app.edit')"
+        @click="$emit('edit')"
+      >
+        <Pencil class="size-4" />
+      </button>
+      <button
+        class="flex flex-1 items-center justify-center gap-2 rounded-lg border border-border py-2 text-sm font-medium text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
         @click="$emit('editPrice')"
       >
         <Coins class="size-4" />
