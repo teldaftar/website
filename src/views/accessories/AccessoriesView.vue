@@ -3,13 +3,8 @@ import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Headphones } from 'lucide-vue-next'
 import type { Accessory, AccessoryListQuery, SoldAccessoryListQuery } from '@/api/types'
-import {
-  useAccessoriesList,
-  useSoldAccessoriesList,
-  useDeleteAccessory,
-} from '@/composables/useAccessories'
+import { useAccessoriesList, useSoldAccessoriesList } from '@/composables/useAccessories'
 import { toUserMessage } from '@/api/errors'
-import { notify } from '@/lib/toast'
 import { t } from '@/i18n'
 import PageHeader from '@/components/shell/PageHeader.vue'
 import PageContainer from '@/components/shell/PageContainer.vue'
@@ -20,7 +15,6 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
 import InfiniteSentinel from '@/components/ui/InfiniteSentinel.vue'
 import AppButton from '@/components/ui/AppButton.vue'
-import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import AccessoryCard from '@/components/accessories/AccessoryCard.vue'
 import AccessoryFormSheet from '@/components/accessories/AccessoryFormSheet.vue'
 import SoldAccessoryCard from '@/components/accessories/SoldAccessoryCard.vue'
@@ -52,9 +46,6 @@ const sold = useSoldAccessoriesList(soldQuery)
 // Sheets / dialogs (current mode) operate on a selected accessory.
 const showForm = ref(false)
 const editing = ref<Accessory | null>(null)
-const deleting = ref<Accessory | null>(null)
-const showDelete = ref(false)
-const deleteAccessory = useDeleteAccessory()
 
 // Sold detail sheet.
 const soldId = ref<string | null>(null)
@@ -68,24 +59,9 @@ function sell(accessory: Accessory) {
   // Selling is a cart flow now — open the new-sale page and jump to this accessory's batches.
   router.push({ name: 'sale-new', query: { accessoryId: accessory.id } })
 }
-function askDelete(accessory: Accessory) {
-  deleting.value = accessory
-  showDelete.value = true
-}
 function openSold(accessoryId: string) {
   soldId.value = accessoryId
   showSoldDetail.value = true
-}
-async function confirmDelete() {
-  if (!deleting.value) return
-  try {
-    await deleteAccessory.mutateAsync(deleting.value.id)
-    notify.success(t('app.delete'))
-  } catch (err) {
-    notify.error(toUserMessage(err))
-  } finally {
-    showDelete.value = false
-  }
 }
 </script>
 
@@ -137,7 +113,6 @@ async function confirmDelete() {
             @open="router.push({ name: 'accessory-detail', params: { id: accessory.id } })"
             @sell="sell(accessory)"
             @edit="edit(accessory)"
-            @remove="askDelete(accessory)"
           />
         </TransitionGroup>
 
@@ -191,12 +166,5 @@ async function confirmDelete() {
 
     <AccessoryFormSheet v-if="editing" v-model="showForm" :accessory="editing" />
     <SoldAccessorySheet v-if="soldId" v-model="showSoldDetail" :accessory-id="soldId" />
-    <ConfirmDialog
-      v-model="showDelete"
-      :title="t('accessories.deleteConfirm')"
-      danger
-      :loading="deleteAccessory.isPending.value"
-      @confirm="confirmDelete"
-    />
   </div>
 </template>
