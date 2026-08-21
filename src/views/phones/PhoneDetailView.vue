@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Smartphone, Pencil, Trash2, Tag, ShoppingCart, Undo2 } from 'lucide-vue-next'
+import { Smartphone, Pencil, Trash2, Tag, ShoppingCart, Undo2, Coins } from 'lucide-vue-next'
 import { usePhone, useDeletePhone } from '@/composables/usePhones'
 import { usePhoneSale } from '@/composables/useSales'
 import { formatMoney, formatMemory, formatDateTime, formatPhone, resolveImageUrl } from '@/lib/format'
@@ -40,6 +40,13 @@ const returnableSale = computed(() => {
   return hasReturnable ? s : null
 })
 
+// The sold phone's sale — links straight to the sale page in edit mode. The
+// backend now allows correcting the price on any sale (returns / paid debt
+// included), so this is offered whenever the phone is sold.
+const editableSale = computed(() =>
+  phone.value?.status === 'SOLD' ? (phoneSale.value ?? null) : null,
+)
+
 const inStock = computed(() => phone.value?.status === 'IN_STOCK')
 const memory = computed(() =>
   phone.value ? formatMemory(phone.value.ramGb, phone.value.storageGb) : '',
@@ -72,6 +79,11 @@ async function onDelete() {
 function sell() {
   if (!phone.value) return
   router.push({ name: 'sale-new', query: { phoneId: phone.value.id } })
+}
+
+function editSalePrice() {
+  if (editableSale.value)
+    router.push({ name: 'sale-detail', params: { id: editableSale.value.id }, query: { edit: '1' } })
 }
 </script>
 
@@ -233,17 +245,29 @@ function sell() {
               {{ t('phones.sell') }}
             </AppButton>
 
-            <AppButton variant="secondary" @click="showEdit = true">
+            <!-- Edit info + print label are only for in-stock phones. -->
+            <AppButton v-if="inStock" variant="secondary" @click="showEdit = true">
               <template #icon><Pencil class="size-4" /></template>
               {{ t('app.edit') }}
             </AppButton>
 
             <AppButton
+              v-if="inStock"
               variant="secondary"
               @click="router.push({ name: 'phone-label', params: { id: phone.id } })"
             >
               <template #icon><Tag class="size-4" /></template>
               {{ t('phones.printLabel') }}
+            </AppButton>
+
+            <AppButton
+              v-if="editableSale"
+              variant="secondary"
+              class="col-span-2"
+              @click="editSalePrice"
+            >
+              <template #icon><Coins class="size-4" /></template>
+              {{ t('phones.editSalePrice') }}
             </AppButton>
 
             <AppButton

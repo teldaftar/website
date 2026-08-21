@@ -493,6 +493,24 @@ export interface CreateSalePayload {
   debt?: DebtInput
 }
 
+export interface UpdateSaleItemInput {
+  id: string
+  unitPrice: number
+}
+
+/**
+ * Correct the sale prices of a completed sale (`PATCH /sales/:id`). Only the
+ * lines whose price changed need to be sent; the rest keep their price. Cost
+ * price is never touched — the server recomputes total/paid/profit.
+ *
+ * ⚠️ `debt` MUST be re-sent for a sale that already carries a debt: omitting it
+ * (or sending `null`) converts the sale to full cash and clears the debt.
+ */
+export interface UpdateSalePayload {
+  items: UpdateSaleItemInput[]
+  debt?: DebtInput | null
+}
+
 export interface ReturnPayload {
   saleItemId: string
   quantity: number

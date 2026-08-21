@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue'
-import { Headphones, Undo2 } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
+import { Headphones, Undo2, Coins } from 'lucide-vue-next'
 import type { Sale } from '@/api/types'
 import { useSoldAccessory } from '@/composables/useAccessories'
 import { useAccessorySales } from '@/composables/useSales'
@@ -16,9 +17,12 @@ import ReturnSheet from '@/components/sales/ReturnSheet.vue'
 const props = defineProps<{ accessoryId: string }>()
 const open = defineModel<boolean>({ required: true })
 
+const router = useRouter()
+
 const { data, isLoading, isError, error, refetch } = useSoldAccessory(toRef(props, 'accessoryId'))
 
-// Each sale that includes this accessory — so it can be returned right here.
+// Each sale that includes this accessory — so it can be returned or its price edited here.
+// The backend allows editing the price on any sale, so every row offers it.
 const { data: sales } = useAccessorySales(toRef(props, 'accessoryId'))
 const saleRows = computed(() =>
   (sales.value ?? [])
@@ -34,6 +38,12 @@ const showReturn = ref(false)
 function openReturn(sale: Sale) {
   selectedSale.value = sale
   showReturn.value = true
+}
+
+/** Jump to the sale page with edit mode auto-opened. */
+function editPrice(sale: Sale) {
+  open.value = false
+  router.push({ name: 'sale-detail', params: { id: sale.id }, query: { edit: '1' } })
 }
 </script>
 
@@ -116,18 +126,21 @@ function openReturn(sale: Sale) {
                 </p>
                 <p class="text-xs text-fg-muted">{{ formatDateTime(row.sale.soldAt) }}</p>
               </div>
-              <AppButton
-                v-if="row.returnable"
-                size="sm"
-                variant="secondary"
-                @click="openReturn(row.sale)"
-              >
-                <template #icon><Undo2 class="size-4" /></template>
-                {{ t('returns.action') }}
-              </AppButton>
-              <span v-else class="shrink-0 text-xs font-medium text-fg-muted">
-                {{ t('returns.fullyReturned') }}
-              </span>
+              <div class="flex shrink-0 flex-col items-end gap-2">
+                <AppButton size="sm" variant="secondary" @click="editPrice(row.sale)">
+                  <template #icon><Coins class="size-4" /></template>
+                  {{ t('sales.editPrice') }}
+                </AppButton>
+                <AppButton
+                  v-if="row.returnable"
+                  size="sm"
+                  variant="secondary"
+                  @click="openReturn(row.sale)"
+                >
+                  <template #icon><Undo2 class="size-4" /></template>
+                  {{ t('returns.action') }}
+                </AppButton>
+              </div>
             </div>
           </div>
           <p v-else class="px-1 text-sm text-fg-muted">{{ t('returns.noSales') }}</p>

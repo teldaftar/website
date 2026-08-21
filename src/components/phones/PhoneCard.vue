@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Smartphone, ShoppingCart, Pencil, Tag, Trash2 } from 'lucide-vue-next'
+import { Smartphone, ShoppingCart, Pencil, Tag, Trash2, Coins } from 'lucide-vue-next'
 import type { Phone } from '@/api/types'
 import { formatMoney, formatMemory, resolveImageUrl } from '@/lib/format'
 import { phoneCondition, usedGrade, phoneStatus } from '@/lib/labels'
@@ -8,7 +8,7 @@ import { t } from '@/i18n'
 import Badge from '@/components/ui/Badge.vue'
 
 const props = defineProps<{ phone: Phone }>()
-defineEmits<{ open: []; sell: []; edit: []; label: []; remove: [] }>()
+defineEmits<{ open: []; sell: []; edit: []; label: []; remove: []; editPrice: [] }>()
 
 const memory = computed(() => formatMemory(props.phone.ramGb, props.phone.storageGb))
 const status = computed(() => phoneStatus(props.phone.status))
@@ -77,10 +77,11 @@ const inStock = computed(() => props.phone.status === 'IN_STOCK')
       </div>
     </button>
 
-    <!-- Quick actions (icon-only) -->
-    <div class="mt-3 flex items-center gap-2 border-t border-border pt-3">
+    <!-- Quick actions (icon-only) — only for in-stock phones. Sold phones show
+         no edit/label/sell/delete here; their card body opens the detail page
+         (returns / sale-price edit live there). -->
+    <div v-if="inStock" class="mt-3 flex items-center gap-2 border-t border-border pt-3">
       <button
-        v-if="inStock"
         class="grid size-9 place-items-center rounded-lg bg-primary text-primary-fg transition-transform active:scale-90"
         :aria-label="t('phones.sell')"
         @click="$emit('sell')"
@@ -102,12 +103,22 @@ const inStock = computed(() => props.phone.status === 'IN_STOCK')
         <Tag class="size-4" />
       </button>
       <button
-        v-if="inStock"
         class="ml-auto grid size-9 place-items-center rounded-lg border border-border text-fg-muted transition-colors hover:bg-danger-soft hover:text-danger"
         :aria-label="t('app.delete')"
         @click="$emit('remove')"
       >
         <Trash2 class="size-4" />
+      </button>
+    </div>
+
+    <!-- Sold phones: edit the sale price (routes to the sale page in edit mode). -->
+    <div v-else class="mt-3 border-t border-border pt-3">
+      <button
+        class="flex w-full items-center justify-center gap-2 rounded-lg border border-border py-2 text-sm font-medium text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
+        @click="$emit('editPrice')"
+      >
+        <Coins class="size-4" />
+        {{ t('phones.editSalePrice') }}
       </button>
     </div>
   </div>

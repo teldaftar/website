@@ -8,6 +8,7 @@ import type {
   Sale,
   SaleListQuery,
   SaleReturn,
+  UpdateSalePayload,
 } from './types'
 
 export const salesApi = {
@@ -26,6 +27,10 @@ export const salesApi = {
   },
   createAccessorySale(payload: CreateAccessorySalePayload) {
     return api.post<Sale>('/sales/accessory', payload).then((r) => r.data)
+  },
+  /** Correct the sale prices of a completed sale (`PATCH /sales/:id`). */
+  update(id: string, payload: UpdateSalePayload) {
+    return api.patch<Sale>(`/sales/${id}`, payload).then((r) => r.data)
   },
   createReturn(id: string, payload: ReturnPayload) {
     return api.post<Sale>(`/sales/${id}/return`, payload).then((r) => r.data)

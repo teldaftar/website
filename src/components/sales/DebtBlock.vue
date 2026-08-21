@@ -12,10 +12,17 @@ const props = defineProps<{
   state: DebtState
   total: number
   errors: Record<string, string>
+  /** Installments already collected on this debt (`debt.paidTotal`); edit mode only. */
+  alreadyPaid?: number
 }>()
 
-// paid = total − debt amount (shown live).
+const alreadyPaid = computed(() => props.alreadyPaid ?? 0)
+// paid (non-debt part, collected as cash) = total − remaining debt, shown live.
 const paid = computed(() => Math.max(0, props.total - (props.state.amount ?? 0)))
+// Editing a debt that already has installments: show jami / to'langan / qoldiq.
+const hasInstallments = computed(() => alreadyPaid.value > 0)
+// Full debt = already-paid installments + the remaining the owner is setting.
+const totalDebt = computed(() => alreadyPaid.value + (props.state.amount ?? 0))
 </script>
 
 <template>
@@ -30,10 +37,30 @@ const paid = computed(() => Math.max(0, props.total - (props.state.amount ?? 0))
 
     <Transition name="dialog">
       <div v-if="state.enabled" class="mt-4 space-y-3">
-        <MoneyInput v-model="state.amount" :label="t('sales.debtAmount')" :error="errors.amount" />
+        <MoneyInput
+          v-model="state.amount"
+          :label="hasInstallments ? t('debts.remaining') : t('sales.debtAmount')"
+          :error="errors.amount"
+        />
 
-        <!-- Live paid / remaining split -->
-        <div class="grid grid-cols-2 gap-3 text-sm">
+        <!-- Edit mode with installments already paid: jami qarz / to'langan / qoldiq -->
+        <div v-if="hasInstallments" class="grid grid-cols-3 gap-3 text-sm">
+          <div class="rounded-xl bg-surface p-3">
+            <p class="text-fg-muted">{{ t('debts.totalDebt') }}</p>
+            <p class="mt-0.5 font-bold text-fg tnum">{{ formatMoney(totalDebt) }}</p>
+          </div>
+          <div class="rounded-xl bg-surface p-3">
+            <p class="text-fg-muted">{{ t('debts.paid') }}</p>
+            <p class="mt-0.5 font-bold text-success tnum">{{ formatMoney(alreadyPaid) }}</p>
+          </div>
+          <div class="rounded-xl bg-surface p-3">
+            <p class="text-fg-muted">{{ t('debts.remaining') }}</p>
+            <p class="mt-0.5 font-bold text-warning tnum">{{ formatMoney(state.amount ?? 0) }}</p>
+          </div>
+        </div>
+
+        <!-- Fresh sale (or no installments): live paid / remaining split -->
+        <div v-else class="grid grid-cols-2 gap-3 text-sm">
           <div class="rounded-xl bg-surface p-3">
             <p class="text-fg-muted">{{ t('sales.paid') }}</p>
             <p class="mt-0.5 font-bold text-success tnum">{{ formatMoney(paid) }}</p>

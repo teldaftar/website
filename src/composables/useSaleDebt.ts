@@ -25,14 +25,23 @@ export function createDebtState(): DebtState {
  * Validate the debt block against the sale total. Returns a field→message map
  * (empty when valid, or when the block is disabled). Mirrors the backend rules
  * so the user gets instant feedback; the server codes are still the source of truth.
+ *
+ * `alreadyPaid` is the debt's already-collected installments (`debt.paidTotal`),
+ * relevant only when editing an existing sale: the remaining debt can be at most
+ * `total − alreadyPaid`. It defaults to 0 for a fresh sale.
  */
-export function validateDebt(state: DebtState, total: number): Record<string, string> {
+export function validateDebt(
+  state: DebtState,
+  total: number,
+  alreadyPaid = 0,
+): Record<string, string> {
   const errors: Record<string, string> = {}
   if (!state.enabled) return errors
 
+  const maxDebt = Math.max(0, total - alreadyPaid)
   if (state.amount == null || state.amount <= 0) {
     errors.amount = t('validation.positive')
-  } else if (state.amount > total) {
+  } else if (state.amount > maxDebt) {
     errors.amount = t('errors.DEBT_EXCEEDS_TOTAL')
   }
 

@@ -8,6 +8,7 @@ const DETAIL_CODES = new Set([
   'RETURN_EXCEEDS_SOLD',
   'RETURN_AMOUNT_EXCEEDS_SOLD',
   'PAYMENT_EXCEEDS_REMAINING',
+  'DEBT_EXCEEDS_TOTAL',
 ])
 
 /** Normalise anything thrown by axios / the app into the backend's error shape. */
@@ -57,6 +58,13 @@ export function mapErrorCode(code: string, details?: Record<string, unknown>): s
     if (details.available != null) {
       return t('errors.INSUFFICIENT_STOCK_DETAIL', { available: num(details.available) })
     }
+  }
+
+  // Editing a sale below the money already collected — tell the owner how much to refund first.
+  if (code === 'SALE_TOTAL_BELOW_COLLECTED' && details) {
+    const collected = Number(details.collected) || 0
+    const newTotal = Number(details.newTotal) || 0
+    return t('errors.SALE_TOTAL_BELOW_COLLECTED', { shortfall: num(Math.max(0, collected - newTotal)) })
   }
 
   if (DETAIL_CODES.has(code) && details) {

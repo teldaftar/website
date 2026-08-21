@@ -11,6 +11,7 @@ import type {
   Sale,
   SaleListQuery,
   SaleType,
+  UpdateSalePayload,
 } from '@/api/types'
 
 export function useSalesList(filters: MaybeRefOrGetter<SaleListQuery>) {
@@ -58,6 +59,22 @@ export function usePhoneSale(phone: MaybeRefOrGetter<Phone | null | undefined>) 
       return sales.find((s) => s.items.some((it) => it.product.id === p.id)) ?? null
     },
   })
+}
+
+/**
+ * Resolve the sale id a sold phone belongs to (shares the cached phone-sales
+ * scan with `usePhoneSale`). Used to jump straight from a sold-phone card to
+ * that sale's page in price-edit mode.
+ */
+export function usePhoneSaleLookup() {
+  const qc = useQueryClient()
+  return async (phoneId: string): Promise<string | null> => {
+    const sales = await qc.ensureQueryData({
+      queryKey: ['sales-full', 'PHONE'],
+      queryFn: () => fetchAllSales('PHONE'),
+    })
+    return sales.find((s) => s.items.some((it) => it.product.id === phoneId))?.id ?? null
+  }
 }
 
 /** All sales that include a given accessory, so each can be returned from the sold sheet. */
@@ -111,6 +128,20 @@ export function useCreateAccessorySale() {
   return useMutation({
     mutationFn: (payload: CreateAccessorySalePayload) => salesApi.createAccessorySale(payload),
     onSuccess: () => invalidateAfterSale(qc),
+  })
+}
+
+/** Correct the sale prices of a completed sale (`PATCH /sales/:id`). */
+export function useUpdateSale() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateSalePayload }) =>
+      salesApi.update(id, payload),
+    onSuccess: (sale) => {
+      invalidateAfterSale(qc)
+      qc.invalidateQueries({ queryKey: ['sale', sale.id] })
+      qc.invalidateQueries({ queryKey: ['sale-returns', sale.id] })
+    },
   })
 }
 

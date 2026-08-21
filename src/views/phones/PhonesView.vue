@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { Plus, Smartphone, ArrowDownUp } from 'lucide-vue-next'
 import type { Phone, PhoneCondition, PhoneListQuery, PhoneStatus, SortOrder } from '@/api/types'
 import { usePhonesList, useDeletePhone } from '@/composables/usePhones'
+import { usePhoneSaleLookup } from '@/composables/useSales'
 import { toUserMessage } from '@/api/errors'
 import { notify } from '@/lib/toast'
 import { t } from '@/i18n'
@@ -96,6 +97,18 @@ function sell(phone: Phone) {
   // Selling is a cart flow now — hand off to the new-sale page with this phone pre-added.
   router.push({ name: 'sale-new', query: { phoneId: phone.id } })
 }
+
+const lookupPhoneSale = usePhoneSaleLookup()
+// Sold-phone card → jump straight to its sale page in price-edit mode.
+async function editSalePrice(phone: Phone) {
+  try {
+    const saleId = await lookupPhoneSale(phone.id)
+    if (saleId) router.push({ name: 'sale-detail', params: { id: saleId }, query: { edit: '1' } })
+    else notify.error(t('returns.noSales'))
+  } catch (err) {
+    notify.error(toUserMessage(err))
+  }
+}
 function askDelete(phone: Phone) {
   deleting.value = phone
   showDelete.value = true
@@ -179,6 +192,7 @@ async function confirmDelete() {
             @edit="edit(phone)"
             @label="router.push({ name: 'phone-label', params: { id: phone.id } })"
             @remove="askDelete(phone)"
+            @edit-price="editSalePrice(phone)"
           />
         </TransitionGroup>
 
