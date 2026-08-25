@@ -221,6 +221,8 @@ export interface AccessoryListQuery {
 export interface CreateAccessoryPayload {
   name: string
   kind?: AccessoryKind
+  /** Free-form IMEI — keypad phones only. */
+  imei?: string | null
   purchasePrice: number
   quantity: number
   salePrice?: number | null
@@ -229,7 +231,7 @@ export interface CreateAccessoryPayload {
 }
 
 export type UpdateAccessoryPayload = Partial<
-  Pick<CreateAccessoryPayload, 'name' | 'purchasePrice' | 'salePrice' | 'note' | 'imageUrl'>
+  Pick<CreateAccessoryPayload, 'name' | 'imei' | 'purchasePrice' | 'salePrice' | 'note' | 'imageUrl'>
 >
 
 export interface StockEntry {

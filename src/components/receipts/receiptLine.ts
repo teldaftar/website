@@ -65,14 +65,13 @@ export function rowFromReceiptItem(key: number, item: StockReceiptItem): Receipt
 }
 
 /**
- * A brand-new receipt line captured in full from the create sheet — the catalog
- * attributes (`input`) plus this intake's quantity and cost. Lets a new item land
- * in the table already complete, with no follow-up row editing required.
+ * A brand-new receipt line captured from the create sheet — the item's catalog
+ * identity (`input`) plus how many arrived. Purchase price and sale price are the
+ * intake's own numbers, so they're left blank here and entered on the row (prixod).
  */
 export interface NewReceiptDraft {
   input: NewAccessoryInput
   quantity: number
-  purchasePrice: number
 }
 
 export function rowFromNew(key: number, draft: NewReceiptDraft): ReceiptRowState {
@@ -85,7 +84,8 @@ export function rowFromNew(key: number, draft: NewReceiptDraft): ReceiptRowState
     imageUrl: draft.input.imageUrl ?? null,
     currentQuantity: null,
     quantity: String(draft.quantity),
-    purchasePrice: draft.purchasePrice,
+    // Cost + sale price are the prixod's job — entered on the row, not the create sheet.
+    purchasePrice: null,
     salePrice: draft.input.salePrice ?? null,
   }
 }

@@ -22,12 +22,12 @@ const emit = defineEmits<{ saved: [Accessory] }>()
 
 const updateAccessory = useUpdateAccessory()
 
-const sheetTitle = computed(() =>
-  props.accessory.kind === 'KEYPAD_PHONE' ? t('keypad.edit') : t('accessories.edit'),
-)
+const isKeypad = computed(() => props.accessory.kind === 'KEYPAD_PHONE')
+const sheetTitle = computed(() => (isKeypad.value ? t('keypad.edit') : t('accessories.edit')))
 
-const form = reactive<{ name: string; note: string; imageUrl: string | null }>({
+const form = reactive<{ name: string; imei: string; note: string; imageUrl: string | null }>({
   name: '',
+  imei: '',
   note: '',
   imageUrl: null,
 })
@@ -38,6 +38,7 @@ watch(open, (v) => {
   if (!v) return
   Object.keys(errors).forEach((k) => delete errors[k])
   form.name = props.accessory.name
+  form.imei = props.accessory.imei ?? ''
   form.note = props.accessory.note ?? ''
   form.imageUrl = props.accessory.imageUrl ?? null
 })
@@ -53,9 +54,15 @@ async function onSubmit() {
   submitting.value = true
   try {
     // Omit quantity / purchasePrice / salePrice — PATCH leaves them unchanged.
+    // IMEI is a keypad-phone-only attribute; send it only for that kind.
     const updated = await updateAccessory.mutateAsync({
       id: props.accessory.id,
-      payload: { name: form.name.trim(), note: form.note || null, imageUrl: form.imageUrl },
+      payload: {
+        name: form.name.trim(),
+        note: form.note || null,
+        imageUrl: form.imageUrl,
+        ...(isKeypad.value && { imei: form.imei.trim() || null }),
+      },
     })
     notify.success(t('settings.saved'))
     emit('saved', updated)
@@ -72,6 +79,12 @@ async function onSubmit() {
   <ModalSheet v-model="open" :title="sheetTitle">
     <form class="space-y-4" novalidate @submit.prevent="onSubmit">
       <AppInput v-model="form.name" :label="t('accessories.name')" :error="errors.name" />
+      <AppInput
+        v-if="isKeypad"
+        v-model="form.imei"
+        :label="t('phones.imei')"
+        :hint="t('app.optional')"
+      />
       <p class="rounded-lg bg-surface-2 px-3 py-2 text-sm text-fg-muted">
         {{ t('accessories.priceLocked') }}
       </p>
