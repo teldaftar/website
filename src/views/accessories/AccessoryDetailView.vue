@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Headphones, Pencil, Trash2, ShoppingCart } from 'lucide-vue-next'
+import { Headphones, Phone, Pencil, Trash2, ShoppingCart } from 'lucide-vue-next'
+import type { AccessoryKind } from '@/api/types'
 import { useAccessory, useStockHistory, useDeleteAccessory } from '@/composables/useAccessories'
 import { formatMoney, formatCost, formatNumber, formatDate, resolveImageUrl } from '@/lib/format'
 import { toUserMessage } from '@/api/errors'
@@ -21,6 +22,14 @@ const route = useRoute()
 const router = useRouter()
 const id = computed(() => String(route.params.id))
 
+// Same detail view backs accessories and keypad phones; meta.kind picks the
+// icon, page-title fallback and where "back" / delete returns to.
+const kind = computed<AccessoryKind>(() => (route.meta.kind as AccessoryKind) ?? 'ACCESSORY')
+const isKeypad = computed(() => kind.value === 'KEYPAD_PHONE')
+const detailIcon = computed(() => (isKeypad.value ? Phone : Headphones))
+const listRoute = computed(() => (isKeypad.value ? 'keypad-phones' : 'accessories'))
+const fallbackTitle = computed(() => (isKeypad.value ? t('keypad.title') : t('accessories.title')))
+
 const { data: accessory, isLoading, isError, error, refetch } = useAccessory(id)
 const { data: history } = useStockHistory(id)
 const deleteAccessory = useDeleteAccessory()
@@ -38,7 +47,7 @@ async function onDelete() {
   try {
     await deleteAccessory.mutateAsync(accessory.value.id)
     notify.success(t('app.delete'))
-    router.replace({ name: 'accessories' })
+    router.replace({ name: listRoute.value })
   } catch (err) {
     notify.error(toUserMessage(err))
   } finally {
@@ -54,7 +63,7 @@ function sell() {
 
 <template>
   <div>
-    <PageHeader :title="accessory?.name ?? t('accessories.title')" back />
+    <PageHeader :title="accessory?.name ?? fallbackTitle" back />
     <PageContainer>
       <DataState
         :loading="isLoading"
@@ -82,7 +91,7 @@ function sell() {
                   alt=""
                   class="size-full object-cover"
                 />
-                <Headphones v-else class="size-8 text-fg-muted" />
+                <component :is="detailIcon" v-else class="size-8 text-fg-muted" />
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex items-start justify-between gap-2">

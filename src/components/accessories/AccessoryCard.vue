@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, type Component } from 'vue'
 import { Headphones, ShoppingCart, Pencil } from 'lucide-vue-next'
 import type { Accessory } from '@/api/types'
 import { formatMoney, resolveImageUrl } from '@/lib/format'
 import { t } from '@/i18n'
 import Badge from '@/components/ui/Badge.vue'
 
-const props = defineProps<{ accessory: Accessory }>()
+const props = defineProps<{ accessory: Accessory; icon?: Component }>()
 defineEmits<{ open: []; sell: []; edit: [] }>()
+
+const fallbackIcon = computed(() => props.icon ?? Headphones)
 
 const image = computed(() => resolveImageUrl(props.accessory.imageUrl))
 const inStock = computed(() => props.accessory.quantity > 0)
@@ -26,7 +28,7 @@ const stock = computed(() => {
     <button class="flex w-full flex-1 gap-3 text-left" @click="$emit('open')">
       <div class="grid size-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-surface-2">
         <img v-if="image" :src="image" alt="" class="size-full object-cover" />
-        <Headphones v-else class="size-7 text-fg-muted" />
+        <component :is="fallbackIcon" v-else class="size-7 text-fg-muted" />
       </div>
 
       <div class="min-w-0 flex-1">

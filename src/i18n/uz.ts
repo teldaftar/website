@@ -38,6 +38,7 @@ export const uz = {
     phones: 'Telefonlar',
     newSale: 'Sotuv',
     accessories: 'Aksessuarlar',
+    keypadPhones: 'Klaviaturali telefonlar',
     receipts: 'Tovar kirimi',
     more: "Ko'proq",
     salesHistory: 'Sotuvlar tarixi',
@@ -152,6 +153,21 @@ export const uz = {
     emptySoldText: 'Hali aksessuar sotilmagan.',
   },
 
+  // Klaviaturali telefonlar — shares most copy with `accessories`; only the
+  // distinct titles / empty-states / confirmations live here.
+  keypad: {
+    title: 'Klaviaturali telefonlar',
+    edit: 'Telefonni tahrirlash',
+    new: 'Yangi klaviaturali telefon',
+    deleteConfirm: "Bu telefonni o'chirasizmi?",
+    emptyTitle: "Klaviaturali telefonlar yo'q",
+    emptyViaReceipt: "Klaviaturali telefonlar Tovar kirimi orqali qo'shiladi.",
+    emptySoldTitle: "Sotuvlar yo'q",
+    emptySoldText: 'Hali klaviaturali telefon sotilmagan.',
+    newHint:
+      "Yangi klaviaturali telefon katalogga qo'shiladi va keyingi kirimlarda ro'yxatda chiqadi.",
+  },
+
   receipts: {
     title: 'Tovar kirimlari',
     detailTitle: 'Tovar kirimi',
@@ -172,6 +188,8 @@ export const uz = {
     lines: 'Tovarlar',
     // Item picker + line editor
     lineNew: 'Yangi aksessuar',
+    tabAccessories: 'Aksessuarlar',
+    tabKeypad: 'Klaviaturali telefonlar',
     addItem: "Tovar qo'shish",
     pickTitle: 'Tovar tanlash',
     createNew: 'Yangi tovar yaratish',
@@ -206,8 +224,10 @@ export const uz = {
     pickType: 'Nima sotilmoqda?',
     phone: 'Telefon',
     accessory: 'Aksessuar',
+    keypad: 'Klaviaturali',
     pickPhone: 'Telefonni tanlang',
     pickAccessory: 'Aksessuarni tanlang',
+    pickKeypad: 'Klaviaturali telefonni tanlang',
     pickBatch: 'Partiyani tanlang',
     pickDone: 'Tayyor',
     pickDoneCount: 'Tayyor · {n} ta',
@@ -236,6 +256,7 @@ export const uz = {
     tabAll: 'Hammasi',
     tabPhones: 'Telefonlar',
     tabAccessories: 'Aksessuarlar',
+    tabKeypad: 'Klaviaturali',
     onlyDebt: 'Faqat qarzli',
     total: 'Jami',
     profit: 'Foyda',
@@ -341,12 +362,15 @@ export const uz = {
     phonesProfit: 'Telefon foydasi',
     accessoriesSold: 'Sotilgan aksessuarlar',
     accessoriesProfit: 'Aksessuar foydasi',
+    keypadProfit: 'Klaviaturali foydasi',
     currentState: 'hozirgi holat',
     currentStateTitle: 'Ombor holati',
     inStockCount: 'Zaxiradagi telefonlar',
     inStockCost: 'Zaxira qiymati',
     remainingQty: 'Qolgan aksessuarlar',
     remainingCost: 'Qoldiq qiymati',
+    keypadRemainingQty: 'Qolgan klaviaturali',
+    keypadRemainingCost: 'Klaviaturali qoldiq',
     debtsTitle: 'Qarzlar',
     openDebts: 'Ochiq qarzlar',
     overdueDebts: 'Kechikkan qarzlar',

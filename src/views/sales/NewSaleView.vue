@@ -7,6 +7,7 @@ import {
   Plus,
   Smartphone,
   Headphones,
+  Phone as PhoneIcon,
   Trash2,
   ShoppingCart,
   Layers,
@@ -58,6 +59,7 @@ const done = ref<Sale | null>(null)
 
 const showPhonePicker = ref(false)
 const showAccessoryPicker = ref(false)
+const showKeypadPicker = ref(false)
 
 // An accessory line needs its available FIFO batches so the quantity can span
 // several intakes; fetch them, then add one consolidated row.
@@ -231,7 +233,7 @@ function openReceipt() {
         <!-- LEFT: add products + cart lines -->
         <section class="space-y-4">
           <!-- Add-product buttons -->
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-3 gap-2">
             <AppButton variant="secondary" @click="showPhonePicker = true">
               <template #icon><Smartphone class="size-4" /></template>
               {{ t('sales.phone') }}
@@ -239,6 +241,10 @@ function openReceipt() {
             <AppButton variant="secondary" @click="showAccessoryPicker = true">
               <template #icon><Headphones class="size-4" /></template>
               {{ t('sales.accessory') }}
+            </AppButton>
+            <AppButton variant="secondary" @click="showKeypadPicker = true">
+              <template #icon><PhoneIcon class="size-4" /></template>
+              {{ t('sales.keypad') }}
             </AppButton>
           </div>
 
@@ -276,7 +282,11 @@ function openReceipt() {
                       alt=""
                       class="size-full object-cover"
                     />
-                    <Headphones v-else class="size-5 text-fg-muted" />
+                    <component
+                      :is="line.accessory.kind === 'KEYPAD_PHONE' ? PhoneIcon : Headphones"
+                      v-else
+                      class="size-5 text-fg-muted"
+                    />
                   </template>
                 </div>
 
@@ -398,6 +408,13 @@ function openReceipt() {
     />
     <AccessoryPickerSheet
       v-model="showAccessoryPicker"
+      :added-ids="addedAccessoryIds"
+      @select="onAccessory"
+      @remove="onAccessoryRemove"
+    />
+    <AccessoryPickerSheet
+      v-model="showKeypadPicker"
+      kind="KEYPAD_PHONE"
       :added-ids="addedAccessoryIds"
       @select="onAccessory"
       @remove="onAccessoryRemove"

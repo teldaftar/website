@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, type Component } from 'vue'
 import { Headphones } from 'lucide-vue-next'
 import type { SoldAccessoryRow } from '@/api/types'
 import { formatMoney, formatNumber, resolveImageUrl } from '@/lib/format'
 import { t } from '@/i18n'
 
-const props = defineProps<{ row: SoldAccessoryRow }>()
+const props = defineProps<{ row: SoldAccessoryRow; icon?: Component }>()
 defineEmits<{ open: [] }>()
 
 const image = computed(() => resolveImageUrl(props.row.imageUrl))
+const fallbackIcon = computed(() => props.icon ?? Headphones)
 </script>
 
 <template>
@@ -18,7 +19,7 @@ const image = computed(() => resolveImageUrl(props.row.imageUrl))
   >
     <div class="grid size-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-surface-2">
       <img v-if="image" :src="image" alt="" class="size-full object-cover" />
-      <Headphones v-else class="size-7 text-fg-muted" />
+      <component :is="fallbackIcon" v-else class="size-7 text-fg-muted" />
     </div>
 
     <div class="min-w-0 flex-1">

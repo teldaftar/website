@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive } from 'vue'
-import { Headphones, Check } from 'lucide-vue-next'
-import type { Accessory, AccessoryListQuery } from '@/api/types'
+import { Headphones, Phone, Check } from 'lucide-vue-next'
+import type { Accessory, AccessoryKind, AccessoryListQuery } from '@/api/types'
 import { useAccessoriesList } from '@/composables/useAccessories'
 import { formatCost, formatNumber, resolveImageUrl } from '@/lib/format'
 import { toUserMessage } from '@/api/errors'
@@ -17,12 +17,20 @@ import AppButton from '@/components/ui/AppButton.vue'
 const open = defineModel<boolean>({ required: true })
 const emit = defineEmits<{ select: [accessory: Accessory]; remove: [accessory: Accessory] }>()
 /** ids already in the cart — shown as selected; tapping again removes them. */
-const props = defineProps<{ addedIds?: string[] }>()
+const props = withDefaults(defineProps<{ addedIds?: string[]; kind?: AccessoryKind }>(), {
+  kind: 'ACCESSORY',
+})
+
+const isKeypad = computed(() => props.kind === 'KEYPAD_PHONE')
+const fallbackIcon = computed(() => (isKeypad.value ? Phone : Headphones))
+const sheetTitle = computed(() => (isKeypad.value ? t('sales.pickKeypad') : t('sales.pickAccessory')))
+const emptyTitle = computed(() => (isKeypad.value ? t('keypad.emptyTitle') : t('accessories.emptyTitle')))
 
 const selectedCount = computed(() => props.addedIds?.length ?? 0)
 
 const filters = reactive({ search: '' })
 const query = computed<AccessoryListQuery>(() => ({
+  kind: isKeypad.value ? 'KEYPAD_PHONE' : undefined,
   search: filters.search.trim() || undefined,
   inStock: true,
 }))
@@ -43,7 +51,7 @@ function pick(accessory: Accessory) {
 </script>
 
 <template>
-  <ModalSheet v-model="open" :title="t('sales.pickAccessory')">
+  <ModalSheet v-model="open" :title="sheetTitle">
     <div class="space-y-3">
       <SearchBar v-model="filters.search" />
 
@@ -61,7 +69,7 @@ function pick(accessory: Accessory) {
         </template>
 
         <template #empty>
-          <EmptyState :icon="Headphones" :title="t('accessories.emptyTitle')" />
+          <EmptyState :icon="fallbackIcon" :title="emptyTitle" />
         </template>
 
         <div class="max-h-[55dvh] space-y-2 overflow-y-auto">
@@ -86,7 +94,7 @@ function pick(accessory: Accessory) {
                 alt=""
                 class="size-full object-cover"
               />
-              <Headphones v-else class="size-5 text-fg-muted" />
+              <component :is="fallbackIcon" v-else class="size-5 text-fg-muted" />
             </div>
             <div class="min-w-0 flex-1">
               <p class="truncate font-medium text-fg">{{ accessory.name }}</p>

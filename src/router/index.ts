@@ -36,11 +36,26 @@ const routes: RouteRecordRaw[] = [
         path: 'accessories',
         name: 'accessories',
         component: () => import('@/views/accessories/AccessoriesView.vue'),
+        meta: { kind: 'ACCESSORY' },
       },
       {
         path: 'accessories/:id',
         name: 'accessory-detail',
         component: () => import('@/views/accessories/AccessoryDetailView.vue'),
+        meta: { kind: 'ACCESSORY' },
+      },
+      // Klaviaturali telefonlar — same views as accessories, driven by meta.kind.
+      {
+        path: 'keypad-phones',
+        name: 'keypad-phones',
+        component: () => import('@/views/accessories/AccessoriesView.vue'),
+        meta: { kind: 'KEYPAD_PHONE' },
+      },
+      {
+        path: 'keypad-phones/:id',
+        name: 'keypad-phone-detail',
+        component: () => import('@/views/accessories/AccessoryDetailView.vue'),
+        meta: { kind: 'KEYPAD_PHONE' },
       },
       {
         path: 'receipts',

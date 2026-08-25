@@ -7,7 +7,8 @@ import {
   formatMoney,
   formatCost,
   formatNumber,
-  formatDateTime,
+  formatDate,
+  formatTime,
   formatPhone,
   resolveImageUrl,
 } from '@/lib/format'
@@ -52,7 +53,11 @@ async function onDelete() {
 <template>
   <div>
     <PageHeader
-      :title="receipt ? `${t('receipts.detailTitle')} ${receipt.code}` : t('receipts.detailTitle')"
+      :title="
+        receipt
+          ? `${t('receipts.detailTitle')} · ${formatDate(receipt.receivedAt)}`
+          : t('receipts.detailTitle')
+      "
       back
     />
     <PageContainer>
@@ -80,8 +85,10 @@ async function onDelete() {
                 <PackagePlus class="size-5" />
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-lg font-bold text-fg tnum">{{ receipt.code }}</p>
-                <p class="text-xs text-fg-muted">{{ formatDateTime(receipt.receivedAt) }}</p>
+                <p class="text-xl font-bold text-fg tnum">{{ formatDate(receipt.receivedAt) }}</p>
+                <p class="text-xs text-fg-muted tnum">
+                  {{ formatTime(receipt.receivedAt) }} · {{ receipt.code }}
+                </p>
               </div>
             </div>
 
@@ -146,10 +153,19 @@ async function onDelete() {
                     alt=""
                     class="size-full object-cover"
                   />
-                  <Headphones v-else class="size-5 text-fg-muted" />
+                  <component
+                    :is="item.kind === 'KEYPAD_PHONE' ? Phone : Headphones"
+                    v-else
+                    class="size-5 text-fg-muted"
+                  />
                 </div>
                 <div class="min-w-0 flex-1">
-                  <p class="truncate font-medium text-fg">{{ item.name }}</p>
+                  <p class="flex items-center gap-1.5 truncate font-medium text-fg">
+                    {{ item.name }}
+                    <Badge v-if="item.kind === 'KEYPAD_PHONE'" tone="info">
+                      {{ t('sales.keypad') }}
+                    </Badge>
+                  </p>
                   <p class="text-xs text-fg-muted tnum">
                     {{ formatNumber(item.quantity) }} {{ t('accessories.unit') }} ×
                     <template v-if="item.purchasePrice === 0">

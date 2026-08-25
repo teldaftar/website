@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Smartphone, Headphones, User } from 'lucide-vue-next'
+import { Smartphone, Headphones, Phone, User } from 'lucide-vue-next'
 import type { Sale } from '@/api/types'
 import { formatMoney, formatDate, resolveImageUrl } from '@/lib/format'
 import { saleStatus } from '@/lib/labels'
@@ -12,12 +12,19 @@ const props = defineProps<{ sale: Sale }>()
 const item = computed(() => props.sale.items[0])
 const product = computed(() => item.value?.product)
 const image = computed(() => resolveImageUrl(product.value?.imageUrl))
+// PHONE → Smartphone, KEYPAD_PHONE → Phone, ACCESSORY/MIXED → Headphones.
+const typeIcon = computed(() => {
+  if (props.sale.type === 'PHONE') return Smartphone
+  if (props.sale.type === 'KEYPAD_PHONE') return Phone
+  return Headphones
+})
 const subtitle = computed(() => {
   // Multi-item / mixed sale: summarise by count instead of the first product's specs.
   if (props.sale.items.length > 1) return t('sales.itemCount', { n: props.sale.items.length })
   const p = product.value
   if (!p) return ''
-  if (props.sale.type === 'ACCESSORY')
+  // Accessory & keypad phone lines carry a quantity; phones show memory/imei.
+  if (props.sale.type === 'ACCESSORY' || props.sale.type === 'KEYPAD_PHONE')
     return `${item.value?.quantity ?? 1} ${t('accessories.unit')}`
   return p.memory || p.imei || ''
 })
@@ -35,11 +42,7 @@ const remainingDebt = computed(() => props.sale.debt?.amount ?? props.sale.debtA
     <div class="flex gap-3">
       <div class="grid size-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-surface-2">
         <img v-if="image" :src="image" alt="" class="size-full object-cover" />
-        <component
-          :is="sale.type === 'PHONE' ? Smartphone : Headphones"
-          v-else
-          class="size-6 text-fg-muted"
-        />
+        <component :is="typeIcon" v-else class="size-6 text-fg-muted" />
       </div>
 
       <div class="min-w-0 flex-1">

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { salesApi } from '@/api/sales'
 import { usePaginatedList } from './usePaginatedList'
 import type {
+  AccessoryKind,
   CreateAccessorySalePayload,
   CreatePhoneSalePayload,
   CreateSalePayload,
@@ -77,12 +78,22 @@ export function usePhoneSaleLookup() {
   }
 }
 
-/** All sales that include a given accessory, so each can be returned from the sold sheet. */
-export function useAccessorySales(accessoryId: MaybeRefOrGetter<string | null | undefined>) {
+/**
+ * All sales that include a given accessory / keypad phone, so each can be
+ * returned or price-edited from the sold sheet. A keypad phone's single-item
+ * sales are typed KEYPAD_PHONE, so the scan is scoped by the product's kind.
+ */
+export function useAccessorySales(
+  accessoryId: MaybeRefOrGetter<string | null | undefined>,
+  kind: MaybeRefOrGetter<AccessoryKind> = 'ACCESSORY',
+) {
+  const saleType = computed<SaleType>(() =>
+    toValue(kind) === 'KEYPAD_PHONE' ? 'KEYPAD_PHONE' : 'ACCESSORY',
+  )
   return useQuery({
-    queryKey: ['sales-full', 'ACCESSORY'],
+    queryKey: ['sales-full', saleType],
     enabled: computed(() => !!toValue(accessoryId)),
-    queryFn: () => fetchAllSales('ACCESSORY'),
+    queryFn: () => fetchAllSales(saleType.value),
     select: (sales): Sale[] => {
       const aid = toValue(accessoryId)
       if (!aid) return []

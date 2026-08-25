@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { Headphones } from 'lucide-vue-next'
-import type { Accessory, AccessoryListQuery, SoldAccessoryListQuery } from '@/api/types'
+import { useRoute, useRouter } from 'vue-router'
+import { Headphones, Phone } from 'lucide-vue-next'
+import type {
+  Accessory,
+  AccessoryKind,
+  AccessoryListQuery,
+  SoldAccessoryListQuery,
+} from '@/api/types'
 import { useAccessoriesList, useSoldAccessoriesList } from '@/composables/useAccessories'
 import { toUserMessage } from '@/api/errors'
 import { t } from '@/i18n'
@@ -20,7 +25,27 @@ import AccessoryFormSheet from '@/components/accessories/AccessoryFormSheet.vue'
 import SoldAccessoryCard from '@/components/accessories/SoldAccessoryCard.vue'
 import SoldAccessorySheet from '@/components/accessories/SoldAccessorySheet.vue'
 
+const route = useRoute()
 const router = useRouter()
+
+// This view backs both the Accessories and Klaviaturali telefonlar pages; the
+// active route's meta.kind drives every kind-specific bit (query, titles, icon,
+// detail route). Defaults to ACCESSORY so the accessories page is unchanged.
+const kind = computed<AccessoryKind>(() => (route.meta.kind as AccessoryKind) ?? 'ACCESSORY')
+const isKeypad = computed(() => kind.value === 'KEYPAD_PHONE')
+const listIcon = computed(() => (isKeypad.value ? Phone : Headphones))
+const detailRoute = computed(() => (isKeypad.value ? 'keypad-phone-detail' : 'accessory-detail'))
+const pageTitle = computed(() => (isKeypad.value ? t('keypad.title') : t('accessories.title')))
+const emptyTitle = computed(() => (isKeypad.value ? t('keypad.emptyTitle') : t('accessories.emptyTitle')))
+const emptyViaReceipt = computed(() =>
+  isKeypad.value ? t('keypad.emptyViaReceipt') : t('accessories.emptyViaReceipt'),
+)
+const emptySoldTitle = computed(() =>
+  isKeypad.value ? t('keypad.emptySoldTitle') : t('accessories.emptySoldTitle'),
+)
+const emptySoldText = computed(() =>
+  isKeypad.value ? t('keypad.emptySoldText') : t('accessories.emptySoldText'),
+)
 
 type Mode = 'current' | 'sold'
 const mode = ref<Mode>('current')
@@ -31,14 +56,19 @@ const modeOptions = [
 
 const filters = reactive<{ search: string }>({ search: '' })
 
+// Only the keypad page sends a kind; accessories omits it (backend defaults to ACCESSORY).
+const kindParam = computed(() => (isKeypad.value ? 'KEYPAD_PHONE' : undefined))
+
 // --- Current (in-stock) list ---
 const currentQuery = computed<AccessoryListQuery>(() => ({
+  kind: kindParam.value,
   search: filters.search.trim() || undefined,
 }))
 const current = useAccessoriesList(currentQuery)
 
 // --- Sold list ---
 const soldQuery = computed<SoldAccessoryListQuery>(() => ({
+  kind: kindParam.value,
   search: filters.search.trim() || undefined,
 }))
 const sold = useSoldAccessoriesList(soldQuery)
@@ -67,7 +97,7 @@ function openSold(accessoryId: string) {
 
 <template>
   <div>
-    <PageHeader :title="t('accessories.title')" />
+    <PageHeader :title="pageTitle" />
 
     <PageContainer wide>
       <div class="space-y-3">
@@ -92,11 +122,7 @@ function openSold(accessoryId: string) {
         </template>
 
         <template #empty>
-          <EmptyState
-            :icon="Headphones"
-            :title="t('accessories.emptyTitle')"
-            :text="t('accessories.emptyViaReceipt')"
-          >
+          <EmptyState :icon="listIcon" :title="emptyTitle" :text="emptyViaReceipt">
             <template #action>
               <AppButton @click="router.push({ name: 'receipt-new' })">
                 {{ t('receipts.new') }}
@@ -110,7 +136,8 @@ function openSold(accessoryId: string) {
             v-for="accessory in current.items.value"
             :key="accessory.id"
             :accessory="accessory"
-            @open="router.push({ name: 'accessory-detail', params: { id: accessory.id } })"
+            :icon="listIcon"
+            @open="router.push({ name: detailRoute, params: { id: accessory.id } })"
             @sell="sell(accessory)"
             @edit="edit(accessory)"
           />
@@ -140,11 +167,7 @@ function openSold(accessoryId: string) {
         </template>
 
         <template #empty>
-          <EmptyState
-            :icon="Headphones"
-            :title="t('accessories.emptySoldTitle')"
-            :text="t('accessories.emptySoldText')"
-          />
+          <EmptyState :icon="listIcon" :title="emptySoldTitle" :text="emptySoldText" />
         </template>
 
         <TransitionGroup tag="div" name="list" class="grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -152,6 +175,7 @@ function openSold(accessoryId: string) {
             v-for="row in sold.items.value"
             :key="row.accessoryId"
             :row="row"
+            :icon="listIcon"
             @open="openSold(row.accessoryId)"
           />
         </TransitionGroup>
@@ -165,6 +189,11 @@ function openSold(accessoryId: string) {
     </PageContainer>
 
     <AccessoryFormSheet v-if="editing" v-model="showForm" :accessory="editing" />
-    <SoldAccessorySheet v-if="soldId" v-model="showSoldDetail" :accessory-id="soldId" />
+    <SoldAccessorySheet
+      v-if="soldId"
+      v-model="showSoldDetail"
+      :accessory-id="soldId"
+      :kind="kind"
+    />
   </div>
 </template>

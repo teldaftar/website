@@ -182,8 +182,17 @@ export interface PhoneLabel {
  * Accessories
  * ------------------------------------------------------------------------- */
 
+/**
+ * Discriminates the two product families that share the accessory model /
+ * endpoints. `KEYPAD_PHONE` (klaviaturali telefon) behaves exactly like an
+ * `ACCESSORY` (batch cost, intake via receipts, batch-picked sale) but gets its
+ * own page, sale type and statistics row.
+ */
+export type AccessoryKind = 'ACCESSORY' | 'KEYPAD_PHONE'
+
 export interface Accessory {
   id: string
+  kind: AccessoryKind
   name: string
   /**
    * Cost of the OLDEST remaining FIFO batch — i.e. the price the next unit sold
@@ -199,6 +208,8 @@ export interface Accessory {
 }
 
 export interface AccessoryListQuery {
+  /** Omit → backend returns only ACCESSORY. Send KEYPAD_PHONE for the phones page. */
+  kind?: AccessoryKind
   search?: string
   inStock?: boolean
   page?: number
@@ -207,6 +218,7 @@ export interface AccessoryListQuery {
 
 export interface CreateAccessoryPayload {
   name: string
+  kind?: AccessoryKind
   purchasePrice: number
   quantity: number
   salePrice?: number | null
@@ -231,6 +243,7 @@ export interface StockEntry {
 /** Sold-accessory summary row — `GET /accessories/sold` (one row per accessory). */
 export interface SoldAccessoryRow {
   accessoryId: string
+  kind?: AccessoryKind
   name: string
   imageUrl?: string | null
   soldQty: number
@@ -255,6 +268,7 @@ export interface SoldAccessoryLine {
 /** Sold-accessory detail — `GET /accessories/:id/sold` (totals + price breakdown). */
 export interface SoldAccessoryDetail {
   accessoryId: string
+  kind?: AccessoryKind
   name: string
   imageUrl?: string | null
   currentQuantity: number
@@ -268,6 +282,7 @@ export interface SoldAccessoryDetail {
 }
 
 export interface SoldAccessoryListQuery {
+  kind?: AccessoryKind
   search?: string
   page?: number
   limit?: number
@@ -297,6 +312,8 @@ export interface StockReceiptRow {
 export interface StockReceiptItem {
   id: string
   accessoryId: string
+  /** Which product family this line fed (accessory vs keypad phone). */
+  kind?: AccessoryKind
   name: string // accessory name (snapshot-friendly)
   imageUrl?: string | null
   quantity: number
@@ -319,9 +336,11 @@ export interface StockReceiptListQuery {
   limit?: number
 }
 
-/** New accessory created inline from a receipt line. */
+/** New accessory (or keypad phone) created inline from a receipt line. */
 export interface NewAccessoryInput {
   name: string
+  /** Defaults to ACCESSORY on the backend; send KEYPAD_PHONE to create a phone. */
+  kind?: AccessoryKind
   salePrice?: number
   imageUrl?: string
   note?: string
@@ -355,8 +374,8 @@ export interface CreateStockReceiptPayload {
  * Sales
  * ------------------------------------------------------------------------- */
 
-/** MIXED = a single sale that contains both phones and accessories. */
-export type SaleType = 'PHONE' | 'ACCESSORY' | 'MIXED'
+/** MIXED = a single sale that contains more than one product family. */
+export type SaleType = 'PHONE' | 'ACCESSORY' | 'KEYPAD_PHONE' | 'MIXED'
 export type SaleStatus = 'COMPLETED' | 'PARTIALLY_RETURNED' | 'RETURNED'
 
 export interface DebtInput {
@@ -476,7 +495,8 @@ export interface CreateSalePhoneLine {
   unitPrice: number
 }
 export interface CreateSaleAccessoryLine {
-  type: 'ACCESSORY'
+  /** Must match the product's kind: ACCESSORY for accessories, KEYPAD_PHONE for phones. */
+  type: 'ACCESSORY' | 'KEYPAD_PHONE'
   accessoryId: string
   stockEntryId: string
   quantity: number
@@ -675,7 +695,10 @@ export interface TotalsStats {
 export interface StatisticsSummary {
   range: { from: string; to: string }
   phones: PhoneStats
+  /** ACCESSORY only — keypad phones are broken out into `keypadPhones`. */
   accessories: AccessoryStats
+  /** Klaviaturali telefonlar — same shape as accessories (may be absent on older backends). */
+  keypadPhones?: AccessoryStats
   expenses: ExpenseStats
   debts: DebtStats
   totals: TotalsStats

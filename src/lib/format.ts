@@ -65,6 +65,14 @@ export function formatDateTime(input: string | number | Date | null | undefined)
   return formatInTimeZone(d, APP_TZ, 'dd.MM.yyyy HH:mm')
 }
 
+/** Time only, in Asia/Tashkent — e.g. "14:30". */
+export function formatTime(input: string | number | Date | null | undefined): string {
+  if (input == null) return '—'
+  const d = toDate(input)
+  if (!d) return '—'
+  return formatInTimeZone(d, APP_TZ, 'HH:mm')
+}
+
 /** Today's date in Asia/Tashkent as `yyyy-MM-dd` (for date-input mins/defaults). */
 export function todayISO(): string {
   return formatInTimeZone(new Date(), APP_TZ, 'yyyy-MM-dd')

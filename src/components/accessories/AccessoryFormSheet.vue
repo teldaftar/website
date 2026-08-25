@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import type { Accessory } from '@/api/types'
 import { useUpdateAccessory } from '@/composables/useAccessories'
 import { toUserMessage } from '@/api/errors'
@@ -21,6 +21,10 @@ const open = defineModel<boolean>({ required: true })
 const emit = defineEmits<{ saved: [Accessory] }>()
 
 const updateAccessory = useUpdateAccessory()
+
+const sheetTitle = computed(() =>
+  props.accessory.kind === 'KEYPAD_PHONE' ? t('keypad.edit') : t('accessories.edit'),
+)
 
 const form = reactive<{ name: string; note: string; imageUrl: string | null }>({
   name: '',
@@ -65,7 +69,7 @@ async function onSubmit() {
 </script>
 
 <template>
-  <ModalSheet v-model="open" :title="t('accessories.edit')">
+  <ModalSheet v-model="open" :title="sheetTitle">
     <form class="space-y-4" novalidate @submit.prevent="onSubmit">
       <AppInput v-model="form.name" :label="t('accessories.name')" :error="errors.name" />
       <p class="rounded-lg bg-surface-2 px-3 py-2 text-sm text-fg-muted">

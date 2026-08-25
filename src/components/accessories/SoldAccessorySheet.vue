@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue'
 import { useRouter } from 'vue-router'
-import { Headphones, Undo2, Coins } from 'lucide-vue-next'
-import type { Sale } from '@/api/types'
+import { Headphones, Phone, Undo2, Coins } from 'lucide-vue-next'
+import type { AccessoryKind, Sale } from '@/api/types'
 import { useSoldAccessory } from '@/composables/useAccessories'
 import { useAccessorySales } from '@/composables/useSales'
 import { formatMoney, formatNumber, formatDateTime, resolveImageUrl } from '@/lib/format'
@@ -14,16 +14,23 @@ import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import ReturnSheet from '@/components/sales/ReturnSheet.vue'
 
-const props = defineProps<{ accessoryId: string }>()
+const props = withDefaults(defineProps<{ accessoryId: string; kind?: AccessoryKind }>(), {
+  kind: 'ACCESSORY',
+})
 const open = defineModel<boolean>({ required: true })
 
 const router = useRouter()
 
+const fallbackIcon = computed(() => (props.kind === 'KEYPAD_PHONE' ? Phone : Headphones))
+
 const { data, isLoading, isError, error, refetch } = useSoldAccessory(toRef(props, 'accessoryId'))
 
-// Each sale that includes this accessory — so it can be returned or its price edited here.
-// The backend allows editing the price on any sale, so every row offers it.
-const { data: sales } = useAccessorySales(toRef(props, 'accessoryId'))
+// Each sale that includes this product — so it can be returned or its price edited here.
+// Scoped by kind because a keypad phone's sales are typed KEYPAD_PHONE, not ACCESSORY.
+const { data: sales } = useAccessorySales(
+  toRef(props, 'accessoryId'),
+  toRef(props, 'kind'),
+)
 const saleRows = computed(() =>
   (sales.value ?? [])
     .map((sale) => {
@@ -75,7 +82,7 @@ function editPrice(sale: Sale) {
               alt=""
               class="size-full object-cover"
             />
-            <Headphones v-else class="size-6 text-fg-muted" />
+            <component :is="fallbackIcon" v-else class="size-6 text-fg-muted" />
           </div>
           <div class="min-w-0">
             <p class="truncate font-semibold text-fg">{{ data.name }}</p>

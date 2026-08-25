@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { Smartphone, Headphones, Undo2, Pencil, X, Check } from 'lucide-vue-next'
+import { Smartphone, Headphones, Phone, Undo2, Pencil, X, Check } from 'lucide-vue-next'
 import { useSale, useSaleReturns, useUpdateSale } from '@/composables/useSales'
 import { createDebtState, validateDebt, buildDebt } from '@/composables/useSaleDebt'
 import { formatMoney, formatDateTime, formatDate, formatPhone, toDateInputValue } from '@/lib/format'
@@ -219,7 +219,13 @@ watch(sale, (s) => {
                     class="grid size-11 shrink-0 place-items-center rounded-lg bg-surface-2 text-fg-muted"
                   >
                     <component
-                      :is="item.itemType === 'PHONE' ? Smartphone : Headphones"
+                      :is="
+                        item.itemType === 'PHONE'
+                          ? Smartphone
+                          : item.itemType === 'KEYPAD_PHONE'
+                            ? Phone
+                            : Headphones
+                      "
                       class="size-5"
                     />
                   </div>

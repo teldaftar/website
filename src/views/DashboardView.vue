@@ -8,6 +8,7 @@ import {
   ArrowUpRight,
   Smartphone,
   Headphones,
+  Phone,
   ChevronRight,
   AlertTriangle,
   HandCoins,
@@ -102,7 +103,7 @@ function refresh() {
             </div>
 
             <!-- Per-category profit -->
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-2 gap-3 lg:grid-cols-3">
               <StatTile
                 :label="t('dashboard.phonesProfit')"
                 :value="s.phones.profit"
@@ -116,6 +117,14 @@ function refresh() {
                 :icon="Headphones"
                 tone="neutral"
                 :hint="`${formatNumber(s.accessories.soldQty)} ${t('accessories.unit')}`"
+              />
+              <StatTile
+                v-if="s.keypadPhones"
+                :label="t('dashboard.keypadProfit')"
+                :value="s.keypadPhones.profit"
+                :icon="Phone"
+                tone="neutral"
+                :hint="`${formatNumber(s.keypadPhones.soldQty)} ${t('accessories.unit')}`"
               />
             </div>
 
@@ -154,6 +163,20 @@ function refresh() {
                     {{ formatMoney(s.accessories.remainingCostAmount) }}
                   </p>
                 </div>
+                <template v-if="s.keypadPhones">
+                  <div>
+                    <p class="text-fg-muted">{{ t('dashboard.keypadRemainingQty') }}</p>
+                    <p class="font-bold text-fg tnum">
+                      {{ formatNumber(s.keypadPhones.remainingQty) }}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-fg-muted">{{ t('dashboard.keypadRemainingCost') }}</p>
+                    <p class="font-bold text-fg tnum">
+                      {{ formatMoney(s.keypadPhones.remainingCostAmount) }}
+                    </p>
+                  </div>
+                </template>
               </div>
             </Card>
 

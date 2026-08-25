@@ -1,5 +1,6 @@
 import type {
   Accessory,
+  AccessoryKind,
   CreateStockReceiptLine,
   NewAccessoryInput,
   StockReceiptItem,
@@ -15,6 +16,8 @@ export interface ReceiptRowState {
   key: number
   accessoryId: string | null
   newAccessory: NewAccessoryInput | null
+  /** Product family — drives the row's icon/badge (accessory vs keypad phone). */
+  kind: AccessoryKind
   /** Display snapshot. */
   name: string
   imageUrl: string | null
@@ -32,6 +35,7 @@ export function rowFromAccessory(key: number, acc: Accessory): ReceiptRowState {
     key,
     accessoryId: acc.id,
     newAccessory: null,
+    kind: acc.kind,
     name: acc.name,
     imageUrl: acc.imageUrl ?? null,
     currentQuantity: acc.quantity,
@@ -49,6 +53,7 @@ export function rowFromReceiptItem(key: number, item: StockReceiptItem): Receipt
     key,
     accessoryId: item.accessoryId,
     newAccessory: null,
+    kind: item.kind ?? 'ACCESSORY',
     name: item.name,
     imageUrl: item.imageUrl ?? null,
     currentQuantity: null,
@@ -64,6 +69,7 @@ export function rowFromNew(key: number, input: NewAccessoryInput): ReceiptRowSta
     key,
     accessoryId: null,
     newAccessory: input,
+    kind: input.kind ?? 'ACCESSORY',
     name: input.name,
     imageUrl: input.imageUrl ?? null,
     currentQuantity: null,
@@ -100,7 +106,9 @@ export function toPayloadLine(r: ReceiptRowState): CreateStockReceiptLine {
   const salePrice = r.salePrice != null && r.salePrice >= 0 ? r.salePrice : undefined
   const base = { quantity: rowQty(r), purchasePrice: r.purchasePrice as number }
   if (r.accessoryId) {
+    // Existing product: the backend already knows its kind — don't resend it.
     return { ...base, accessoryId: r.accessoryId, ...(salePrice != null && { salePrice }) }
   }
-  return { ...base, newAccessory: { ...(r.newAccessory as NewAccessoryInput), salePrice } }
+  // New product: carry the row's kind so the catalog entry is created in the right family.
+  return { ...base, newAccessory: { ...(r.newAccessory as NewAccessoryInput), kind: r.kind, salePrice } }
 }

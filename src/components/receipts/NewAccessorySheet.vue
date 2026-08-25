@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue'
-import type { NewAccessoryInput } from '@/api/types'
+import { computed, reactive, ref, watch } from 'vue'
+import type { AccessoryKind, NewAccessoryInput } from '@/api/types'
 import { t } from '@/i18n'
 import ModalSheet from '@/components/ui/ModalSheet.vue'
 import AppInput from '@/components/ui/AppInput.vue'
@@ -13,8 +13,13 @@ import AppButton from '@/components/ui/AppButton.vue'
  * yields a `newAccessory` line; the backend persists it to the catalog when the
  * receipt is saved. Quantity + purchase price are entered later in the table.
  */
+const props = withDefaults(defineProps<{ kind?: AccessoryKind }>(), { kind: 'ACCESSORY' })
 const open = defineModel<boolean>({ required: true })
 const emit = defineEmits<{ create: [NewAccessoryInput] }>()
+
+const isKeypad = computed(() => props.kind === 'KEYPAD_PHONE')
+const sheetTitle = computed(() => (isKeypad.value ? t('keypad.new') : t('receipts.lineNew')))
+const sheetHint = computed(() => (isKeypad.value ? t('keypad.newHint') : t('receipts.newHint')))
 
 const form = reactive<{
   name: string
@@ -41,6 +46,7 @@ function onSubmit() {
   }
   emit('create', {
     name: form.name.trim(),
+    kind: props.kind,
     imageUrl: form.imageUrl ?? undefined,
     note: form.note.trim() || undefined,
   })
@@ -49,10 +55,10 @@ function onSubmit() {
 </script>
 
 <template>
-  <ModalSheet v-model="open" :title="t('receipts.lineNew')">
+  <ModalSheet v-model="open" :title="sheetTitle">
     <form class="space-y-4" novalidate @submit.prevent="onSubmit">
       <p class="rounded-lg bg-surface-2 px-3 py-2 text-xs text-fg-muted">
-        {{ t('receipts.newHint') }}
+        {{ sheetHint }}
       </p>
 
       <AppInput v-model="form.name" :label="t('receipts.newName')" :error="errors.name" />

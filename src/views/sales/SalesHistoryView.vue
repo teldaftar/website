@@ -49,6 +49,7 @@ const typeOptions = [
   { label: t('sales.tabAll'), value: 'ALL' as const },
   { label: t('sales.tabPhones'), value: 'PHONE' as const },
   { label: t('sales.tabAccessories'), value: 'ACCESSORY' as const },
+  { label: t('sales.tabKeypad'), value: 'KEYPAD_PHONE' as const },
 ]
 </script>
 

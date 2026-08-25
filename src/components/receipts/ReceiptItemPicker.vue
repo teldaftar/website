@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
-import { Check, Plus, Headphones } from 'lucide-vue-next'
-import type { Accessory, AccessoryListQuery, NewAccessoryInput } from '@/api/types'
+import { Check, Plus, Headphones, Phone } from 'lucide-vue-next'
+import type { Accessory, AccessoryKind, AccessoryListQuery, NewAccessoryInput } from '@/api/types'
 import { useAccessoriesList } from '@/composables/useAccessories'
 import { toUserMessage } from '@/api/errors'
 import { resolveImageUrl } from '@/lib/format'
 import { t } from '@/i18n'
 import ModalSheet from '@/components/ui/ModalSheet.vue'
+import Segmented from '@/components/ui/Segmented.vue'
 import SearchBar from '@/components/ui/SearchBar.vue'
 import DataState from '@/components/ui/DataState.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
@@ -21,8 +22,19 @@ const emit = defineEmits<{ add: [{ existing: Accessory[]; created: NewAccessoryI
 
 const addedSet = computed(() => new Set(props.addedIds))
 
+// One receipt can mix both families — the tab picks the kind of the existing-item
+// list and of anything created here. Selections from the other tab are kept.
+const kind = ref<AccessoryKind>('ACCESSORY')
+const kindOptions = [
+  { label: t('receipts.tabAccessories'), value: 'ACCESSORY' as const },
+  { label: t('receipts.tabKeypad'), value: 'KEYPAD_PHONE' as const },
+]
+
 const search = ref('')
-const query = computed<AccessoryListQuery>(() => ({ search: search.value.trim() || undefined }))
+const query = computed<AccessoryListQuery>(() => ({
+  kind: kind.value === 'KEYPAD_PHONE' ? 'KEYPAD_PHONE' : undefined,
+  search: search.value.trim() || undefined,
+}))
 const {
   items,
   isLoading,
@@ -45,6 +57,7 @@ watch(open, (v) => {
   selected.clear()
   pendingNew.value = []
   search.value = ''
+  kind.value = 'ACCESSORY'
 })
 
 const selectedCount = computed(
@@ -74,6 +87,7 @@ function submit() {
 <template>
   <ModalSheet v-model="open" :title="t('receipts.pickTitle')">
     <div class="space-y-3">
+      <Segmented v-model="kind" :options="kindOptions" />
       <SearchBar v-model="search" />
 
       <AppButton variant="secondary" block @click="showCreate = true">
@@ -107,7 +121,11 @@ function submit() {
             alt=""
             class="size-full object-cover"
           />
-          <Headphones v-else class="size-4 text-fg-muted" />
+          <component
+            :is="p.input.kind === 'KEYPAD_PHONE' ? Phone : Headphones"
+            v-else
+            class="size-4 text-fg-muted"
+          />
         </span>
         <span class="min-w-0 flex-1">
           <span class="block truncate font-medium text-fg">{{ p.input.name }}</span>
@@ -130,7 +148,10 @@ function submit() {
         </template>
 
         <template #empty>
-          <EmptyState :icon="Headphones" :title="t('receipts.noResults')" />
+          <EmptyState
+            :icon="kind === 'KEYPAD_PHONE' ? Phone : Headphones"
+            :title="t('receipts.noResults')"
+          />
         </template>
 
         <div class="space-y-2">
@@ -170,7 +191,11 @@ function submit() {
                 alt=""
                 class="size-full object-cover"
               />
-              <Headphones v-else class="size-4 text-fg-muted" />
+              <component
+                :is="kind === 'KEYPAD_PHONE' ? Phone : Headphones"
+                v-else
+                class="size-4 text-fg-muted"
+              />
             </span>
             <span class="min-w-0 flex-1">
               <span class="block truncate font-medium text-fg">{{ acc.name }}</span>
@@ -205,5 +230,5 @@ function submit() {
     </div>
   </ModalSheet>
 
-  <NewAccessorySheet v-model="showCreate" @create="onCreate" />
+  <NewAccessorySheet v-model="showCreate" :kind="kind" @create="onCreate" />
 </template>

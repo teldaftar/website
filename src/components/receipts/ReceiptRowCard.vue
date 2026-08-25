@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Headphones, X } from 'lucide-vue-next'
+import { computed } from 'vue'
+import { Headphones, Phone, X } from 'lucide-vue-next'
 import { formatMoney, resolveImageUrl } from '@/lib/format'
 import { t } from '@/i18n'
 import AppInput from '@/components/ui/AppInput.vue'
@@ -9,6 +10,8 @@ import { rowSubtotal, type ReceiptRowState } from './receiptLine'
 
 const row = defineModel<ReceiptRowState>({ required: true })
 defineEmits<{ remove: [] }>()
+
+const isKeypad = computed(() => row.value.kind === 'KEYPAD_PHONE')
 </script>
 
 <template>
@@ -21,12 +24,13 @@ defineEmits<{ remove: [] }>()
           alt=""
           class="size-full object-cover"
         />
-        <Headphones v-else class="size-5 text-fg-muted" />
+        <component :is="isKeypad ? Phone : Headphones" v-else class="size-5 text-fg-muted" />
       </div>
 
       <div class="min-w-0 flex-1">
         <p class="truncate font-medium text-fg">{{ row.name }}</p>
-        <p class="mt-0.5 text-xs text-fg-muted">
+        <p class="mt-0.5 flex flex-wrap items-center gap-1 text-xs text-fg-muted">
+          <Badge v-if="isKeypad" tone="info">{{ t('sales.keypad') }}</Badge>
           <Badge v-if="row.newAccessory" tone="primary">{{ t('receipts.lineNew') }}</Badge>
           <template v-else-if="row.currentQuantity != null">
             {{ t('receipts.quantityInStock', { n: row.currentQuantity }) }}

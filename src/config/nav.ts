@@ -3,6 +3,7 @@ import {
   Home,
   Smartphone,
   Headphones,
+  Phone,
   LayoutGrid,
   History,
   HandCoins,
@@ -34,6 +35,7 @@ export const sidebarItems: NavItem[] = [
   { name: 'dashboard', label: t('nav.dashboard'), icon: Home },
   { name: 'phones', label: t('nav.phones'), icon: Smartphone },
   { name: 'accessories', label: t('nav.accessories'), icon: Headphones },
+  { name: 'keypad-phones', label: t('nav.keypadPhones'), icon: Phone },
   { name: 'receipts', label: t('nav.receipts'), icon: PackagePlus },
   { name: 'sales', label: t('nav.salesHistory'), icon: History },
   { name: 'debts', label: t('nav.debts'), icon: HandCoins },
@@ -43,6 +45,7 @@ export const sidebarItems: NavItem[] = [
 
 /** Secondary destinations shown on the mobile "More" screen. */
 export const moreItems: NavItem[] = [
+  { name: 'keypad-phones', label: t('nav.keypadPhones'), icon: Phone },
   { name: 'receipts', label: t('nav.receipts'), icon: PackagePlus },
   { name: 'sales', label: t('nav.salesHistory'), icon: History },
   { name: 'debts', label: t('nav.debts'), icon: HandCoins },

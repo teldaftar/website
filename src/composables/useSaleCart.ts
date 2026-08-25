@@ -100,6 +100,9 @@ export function useSaleCart() {
       if (l.type === 'PHONE') {
         return [{ type: 'PHONE', phoneId: l.phone.id, unitPrice: l.unitPrice as number }]
       }
+      // The line's payload type follows the product family; a keypad phone sells
+      // through the same batch mechanics as an accessory but must be typed KEYPAD_PHONE.
+      const lineType = l.accessory.kind === 'KEYPAD_PHONE' ? 'KEYPAD_PHONE' : 'ACCESSORY'
       const out: CreateSaleLine[] = []
       let remaining = l.quantity
       for (const batch of l.batches) {
@@ -107,7 +110,7 @@ export function useSaleCart() {
         const take = Math.min(remaining, batch.remainingQuantity)
         if (take <= 0) continue
         out.push({
-          type: 'ACCESSORY',
+          type: lineType,
           accessoryId: l.accessory.id,
           stockEntryId: batch.id,
           quantity: take,
