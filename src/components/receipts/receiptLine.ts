@@ -64,18 +64,29 @@ export function rowFromReceiptItem(key: number, item: StockReceiptItem): Receipt
   }
 }
 
-export function rowFromNew(key: number, input: NewAccessoryInput): ReceiptRowState {
+/**
+ * A brand-new receipt line captured in full from the create sheet — the catalog
+ * attributes (`input`) plus this intake's quantity and cost. Lets a new item land
+ * in the table already complete, with no follow-up row editing required.
+ */
+export interface NewReceiptDraft {
+  input: NewAccessoryInput
+  quantity: number
+  purchasePrice: number
+}
+
+export function rowFromNew(key: number, draft: NewReceiptDraft): ReceiptRowState {
   return {
     key,
     accessoryId: null,
-    newAccessory: input,
-    kind: input.kind ?? 'ACCESSORY',
-    name: input.name,
-    imageUrl: input.imageUrl ?? null,
+    newAccessory: draft.input,
+    kind: draft.input.kind ?? 'ACCESSORY',
+    name: draft.input.name,
+    imageUrl: draft.input.imageUrl ?? null,
     currentQuantity: null,
-    quantity: '',
-    purchasePrice: null,
-    salePrice: input.salePrice ?? null,
+    quantity: String(draft.quantity),
+    purchasePrice: draft.purchasePrice,
+    salePrice: draft.input.salePrice ?? null,
   }
 }
 

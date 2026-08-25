@@ -111,6 +111,10 @@ function sell() {
                     <span class="text-fg-muted">{{ t('accessories.purchasePrice') }}</span>
                     <span class="text-fg tnum">{{ formatCost(accessory.purchasePrice) }}</span>
                   </div>
+                  <div v-if="accessory.imei" class="flex justify-between gap-2">
+                    <span class="text-fg-muted">{{ t('phones.imei') }}</span>
+                    <span class="font-medium text-fg tnum">{{ accessory.imei }}</span>
+                  </div>
                 </div>
               </div>
             </div>

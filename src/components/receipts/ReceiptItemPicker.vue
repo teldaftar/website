@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { Check, Plus, Headphones, Phone } from 'lucide-vue-next'
-import type { Accessory, AccessoryKind, AccessoryListQuery, NewAccessoryInput } from '@/api/types'
+import type { Accessory, AccessoryKind, AccessoryListQuery } from '@/api/types'
+import type { NewReceiptDraft } from './receiptLine'
 import { useAccessoriesList } from '@/composables/useAccessories'
 import { toUserMessage } from '@/api/errors'
 import { resolveImageUrl } from '@/lib/format'
@@ -18,7 +19,7 @@ import NewAccessorySheet from './NewAccessorySheet.vue'
 /** Accessory ids already in the receipt table — shown as added / disabled. */
 const props = defineProps<{ addedIds: string[] }>()
 const open = defineModel<boolean>({ required: true })
-const emit = defineEmits<{ add: [{ existing: Accessory[]; created: NewAccessoryInput[] }] }>()
+const emit = defineEmits<{ add: [{ existing: Accessory[]; created: NewReceiptDraft[] }] }>()
 
 const addedSet = computed(() => new Set(props.addedIds))
 
@@ -49,7 +50,7 @@ const {
 // Selection state (reset every time the sheet opens).
 const selected = reactive(new Map<string, Accessory>())
 let newSeq = 1
-const pendingNew = ref<{ id: number; input: NewAccessoryInput; selected: boolean }[]>([])
+const pendingNew = ref<{ id: number; draft: NewReceiptDraft; selected: boolean }[]>([])
 const showCreate = ref(false)
 
 watch(open, (v) => {
@@ -70,15 +71,15 @@ function toggleExisting(acc: Accessory) {
   else selected.set(acc.id, acc)
 }
 
-function onCreate(input: NewAccessoryInput) {
-  pendingNew.value.unshift({ id: newSeq++, input, selected: true })
+function onCreate(draft: NewReceiptDraft) {
+  pendingNew.value.unshift({ id: newSeq++, draft, selected: true })
 }
 
 function submit() {
   if (selectedCount.value === 0) return
   emit('add', {
     existing: [...selected.values()],
-    created: pendingNew.value.filter((p) => p.selected).map((p) => p.input),
+    created: pendingNew.value.filter((p) => p.selected).map((p) => p.draft),
   })
   open.value = false
 }
@@ -116,20 +117,22 @@ function submit() {
           class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-lg bg-surface-2"
         >
           <img
-            v-if="resolveImageUrl(p.input.imageUrl)"
-            :src="resolveImageUrl(p.input.imageUrl) ?? ''"
+            v-if="resolveImageUrl(p.draft.input.imageUrl)"
+            :src="resolveImageUrl(p.draft.input.imageUrl) ?? ''"
             alt=""
             class="size-full object-cover"
           />
           <component
-            :is="p.input.kind === 'KEYPAD_PHONE' ? Phone : Headphones"
+            :is="p.draft.input.kind === 'KEYPAD_PHONE' ? Phone : Headphones"
             v-else
             class="size-4 text-fg-muted"
           />
         </span>
         <span class="min-w-0 flex-1">
-          <span class="block truncate font-medium text-fg">{{ p.input.name }}</span>
-          <span class="text-xs text-primary">{{ t('receipts.lineNew') }}</span>
+          <span class="block truncate font-medium text-fg">{{ p.draft.input.name }}</span>
+          <span class="text-xs text-primary">
+            {{ p.draft.quantity }} {{ t('accessories.unit') }} · {{ t('receipts.lineNew') }}
+          </span>
         </span>
       </button>
 

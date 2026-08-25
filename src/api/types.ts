@@ -194,6 +194,8 @@ export interface Accessory {
   id: string
   kind: AccessoryKind
   name: string
+  /** Free-form IMEI — only meaningful for keypad phones (null/omitted for accessories). */
+  imei?: string | null
   /**
    * Cost of the OLDEST remaining FIFO batch — i.e. the price the next unit sold
    * will be costed at ("hozir shu narxdan sotilyapti"). 0 = tekin.
@@ -341,6 +343,8 @@ export interface NewAccessoryInput {
   name: string
   /** Defaults to ACCESSORY on the backend; send KEYPAD_PHONE to create a phone. */
   kind?: AccessoryKind
+  /** Free-form IMEI — keypad phones only. */
+  imei?: string
   salePrice?: number
   imageUrl?: string
   note?: string

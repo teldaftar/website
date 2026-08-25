@@ -2,7 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Plus, PackagePlus } from 'lucide-vue-next'
-import type { Accessory, CreateStockReceiptPayload, NewAccessoryInput } from '@/api/types'
+import type { Accessory, CreateStockReceiptPayload } from '@/api/types'
 import {
   useCreateStockReceipt,
   useUpdateStockReceipt,
@@ -27,6 +27,7 @@ import {
   rowQty,
   rowSubtotal,
   toPayloadLine,
+  type NewReceiptDraft,
   type ReceiptRowState,
 } from '@/components/receipts/receiptLine'
 
@@ -70,15 +71,15 @@ const addedIds = computed(() =>
   rows.filter((r) => r.accessoryId).map((r) => r.accessoryId as string),
 )
 
-function onAdd(picked: { existing: Accessory[]; created: NewAccessoryInput[] }) {
+function onAdd(picked: { existing: Accessory[]; created: NewReceiptDraft[] }) {
   const already = new Set(addedIds.value)
   for (const acc of picked.existing) {
     if (already.has(acc.id)) continue
     rows.push(rowFromAccessory(keySeq++, acc))
     already.add(acc.id)
   }
-  for (const input of picked.created) {
-    rows.push(rowFromNew(keySeq++, input))
+  for (const draft of picked.created) {
+    rows.push(rowFromNew(keySeq++, draft))
   }
 }
 
