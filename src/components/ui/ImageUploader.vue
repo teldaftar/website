@@ -43,7 +43,7 @@ function remove() {
 
 <template>
   <div class="w-full">
-    <span v-if="label" class="mb-1.5 block text-sm font-medium text-fg-muted">{{ label }}</span>
+    <span v-if="label" class="eyebrow mb-2 block">{{ label }}</span>
 
     <input ref="input" type="file" accept="image/*" class="hidden" @change="onChange" />
 

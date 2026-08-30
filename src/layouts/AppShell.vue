@@ -24,7 +24,7 @@ onMounted(prefetchRoutes)
       <!-- Padding lives on <main>; the positioning context is the inner wrapper
            (no padding) so the absolutely-positioned leaving view (see main.css)
            lines up with the in-flow entering view — no vertical jump. -->
-      <main class="flex-1 pt-5">
+      <main class="flex-1 lg:pt-5">
         <div class="relative min-h-full overflow-x-hidden">
           <RouterView v-slot="{ Component }">
             <Transition :name="transitionName">

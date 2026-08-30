@@ -31,10 +31,10 @@ Chart.register(
 
 const props = defineProps<{ daily: DailyStat[] }>()
 
-// Brand colours that read well in both light and dark themes.
-const SALES = '#6366f1'
-const PROFIT = '#22c55e'
-const DEBT = '#f59e0b'
+// Brand colours (stone + emerald palette) that read well in both themes.
+const SALES = '#0e7490' // info teal
+const PROFIT = '#059669' // emerald — profit is the star line
+const DEBT = '#b45309' // amber
 
 const data = computed<ChartData<'line'>>(() => ({
   labels: props.daily.map((d) => formatDate(d.date).slice(0, 5)),
@@ -43,7 +43,7 @@ const data = computed<ChartData<'line'>>(() => ({
       label: t('dashboard.chartSales'),
       data: props.daily.map((d) => d.salesAmount),
       borderColor: SALES,
-      backgroundColor: 'rgba(99, 102, 241, 0.12)',
+      backgroundColor: 'rgba(14, 116, 144, 0.12)',
       fill: true,
       tension: 0.35,
       borderWidth: 2,

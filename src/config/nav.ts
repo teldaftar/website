@@ -7,9 +7,11 @@ import {
   LayoutGrid,
   History,
   HandCoins,
+  Landmark,
   Receipt,
   PackagePlus,
   Settings,
+  ShoppingCart,
 } from 'lucide-vue-next'
 import { t } from '@/i18n'
 
@@ -19,9 +21,17 @@ export interface NavItem {
   icon: Component
 }
 
+/** The "new sale" destination — surfaced as a primary action, not a plain tab. */
+export const newSaleItem: NavItem = {
+  name: 'sale-new',
+  label: t('sales.title'),
+  icon: ShoppingCart,
+}
+
 /**
- * Bottom tab bar (mobile). Selling happens directly from the Telefonlar /
- * Aksessuarlar screens (per-product), so there's no dedicated "new sale" tab.
+ * Bottom tab bar (mobile). The center slot is reserved for the raised "Sotuv"
+ * action button (rendered separately in BottomNav), so this list has 4 tabs
+ * arranged two-on-each-side of it.
  */
 export const bottomTabs: NavItem[] = [
   { name: 'dashboard', label: t('nav.dashboard'), icon: Home },
@@ -30,7 +40,7 @@ export const bottomTabs: NavItem[] = [
   { name: 'more', label: t('nav.more'), icon: LayoutGrid },
 ]
 
-/** Full destination list for the desktop sidebar. */
+/** Full destination list for the desktop sidebar (excludes the New Sale CTA). */
 export const sidebarItems: NavItem[] = [
   { name: 'dashboard', label: t('nav.dashboard'), icon: Home },
   { name: 'phones', label: t('nav.phones'), icon: Smartphone },
@@ -40,6 +50,7 @@ export const sidebarItems: NavItem[] = [
   { name: 'sales', label: t('nav.salesHistory'), icon: History },
   { name: 'debts', label: t('nav.debts'), icon: HandCoins },
   { name: 'expenses', label: t('nav.expenses'), icon: Receipt },
+  { name: 'creditors', label: t('nav.creditors'), icon: Landmark },
   { name: 'settings', label: t('nav.settings'), icon: Settings },
 ]
 
@@ -50,5 +61,6 @@ export const moreItems: NavItem[] = [
   { name: 'sales', label: t('nav.salesHistory'), icon: History },
   { name: 'debts', label: t('nav.debts'), icon: HandCoins },
   { name: 'expenses', label: t('nav.expenses'), icon: Receipt },
+  { name: 'creditors', label: t('nav.creditors'), icon: Landmark },
   { name: 'settings', label: t('nav.settings'), icon: Settings },
 ]

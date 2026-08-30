@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import type { CreatePhonePayload, Phone, PhoneCondition, UsedGrade } from '@/api/types'
 import { useCreatePhone, useUpdatePhone } from '@/composables/usePhones'
 import { normalizeError, mapErrorCode } from '@/api/errors'
+import { newIdempotencyKey } from '@/lib/idempotency'
 import { notify } from '@/lib/toast'
 import { t } from '@/i18n'
 import ModalSheet from '@/components/ui/ModalSheet.vue'
@@ -45,6 +46,10 @@ interface FormState {
 
 const form = reactive<FormState>(blank())
 const errors = reactive<Record<string, string>>({})
+
+// One idempotency key per "add phone" intent — minted when the modal opens for a
+// new phone and kept across retries so a re-submit never creates a duplicate.
+const idempotencyKey = ref('')
 
 function blank(): FormState {
   return {
@@ -89,6 +94,8 @@ watch(open, (v) => {
     form.supplierPhone = p.supplierPhone ?? ''
   } else {
     Object.assign(form, blank())
+    // Fresh add → fresh idempotency key for this new intent.
+    idempotencyKey.value = newIdempotencyKey()
   }
 })
 
@@ -153,7 +160,8 @@ async function onSubmit() {
 
     const saved = props.phone
       ? await updatePhone.mutateAsync({ id: props.phone.id, payload })
-      : await createPhone.mutateAsync(payload)
+      : // Same key on every retry of this intent → backend won't duplicate.
+        await createPhone.mutateAsync({ ...payload, idempotencyKey: idempotencyKey.value })
     finish(saved, isEdit() ? t('settings.saved') : t('phones.added'))
   } catch (err) {
     handleError(err)

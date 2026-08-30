@@ -98,6 +98,11 @@ const routes: RouteRecordRaw[] = [
         name: 'expenses',
         component: () => import('@/views/expenses/ExpensesView.vue'),
       },
+      {
+        path: 'creditors',
+        name: 'creditors',
+        component: () => import('@/views/creditors/CreditorsView.vue'),
+      },
       { path: 'more', name: 'more', component: () => import('@/views/MoreView.vue') },
       {
         path: 'settings',

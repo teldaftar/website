@@ -33,6 +33,13 @@ export const uz = {
     pullToRefresh: 'Yangilash uchun torting',
   },
 
+  update: {
+    title: 'Yangi versiya mavjud',
+    message: 'Dasturning yangilangan versiyasi chiqdi. Yangilash uchun sahifani qayta yuklang.',
+    reload: 'Yangilash',
+    later: 'Keyinroq',
+  },
+
   nav: {
     dashboard: 'Bosh sahifa',
     phones: 'Telefonlar',
@@ -44,6 +51,7 @@ export const uz = {
     salesHistory: 'Sotuvlar tarixi',
     debts: 'Qarzlar',
     expenses: 'Xarajatlar',
+    creditors: 'Haqdorlar',
     settings: 'Sozlamalar',
     logout: 'Chiqish',
   },
@@ -345,6 +353,25 @@ export const uz = {
     deleteConfirm: 'Bu xarajatni o‘chirasizmi?',
     emptyTitle: 'Xarajatlar yo‘q',
     emptyText: 'Hali xarajat qo‘shilmagan.',
+  },
+
+  creditors: {
+    title: 'Haqdorlar',
+    add: "Haqdor qo'shish",
+    edit: 'Haqdorni tahrirlash',
+    amount: 'Summa',
+    creditorName: 'Kimdan',
+    phone: 'Telefon raqami',
+    note: 'Izoh',
+    borrowedAt: 'Olgan sana',
+    dueDate: 'Beradigan sana',
+    borrowedShort: 'Olgan',
+    dueShort: 'Beradigan',
+    overdue: "Muddati o'tgan",
+    total: 'Jami',
+    deleteConfirm: "Bu yozuvni o‘chirasizmi?",
+    emptyTitle: "Haqdorlar yo‘q",
+    emptyText: 'Hali haqdor qo‘shilmagan.',
   },
 
   dashboard: {

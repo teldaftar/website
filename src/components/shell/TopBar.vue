@@ -22,7 +22,7 @@ const auth = useAuthStore()
         <Moon v-else class="size-5" />
       </button>
       <div
-        class="grid size-9 place-items-center rounded-full bg-primary-soft text-sm font-semibold text-primary"
+        class="grid size-9 place-items-center rounded-lg bg-primary-soft text-sm font-semibold text-primary"
       >
         {{ (auth.user?.fullName ?? '?').charAt(0).toUpperCase() }}
       </div>

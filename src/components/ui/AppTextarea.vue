@@ -22,7 +22,7 @@ const describedBy = computed(() =>
 
 <template>
   <div class="w-full">
-    <label v-if="label" :for="id" class="mb-1.5 block text-sm font-medium text-fg-muted">
+    <label v-if="label" :for="id" class="eyebrow mb-2 block">
       {{ label }}
     </label>
     <textarea
@@ -34,10 +34,10 @@ const describedBy = computed(() =>
       :aria-invalid="!!error"
       :aria-describedby="describedBy"
       :class="[
-        'w-full resize-y rounded-xl border bg-surface px-3.5 py-2.5 text-[15px] text-fg outline-none',
+        'w-full resize-y rounded-lg border bg-surface px-3.5 py-2.5 text-[15px] text-fg outline-none',
         'placeholder:text-fg-muted/60 transition-colors',
-        'focus:border-primary focus:ring-2 focus:ring-primary/25 disabled:opacity-60',
-        error ? 'border-danger focus:ring-danger/25' : 'border-border',
+        'focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60',
+        error ? 'border-danger focus:ring-danger/20' : 'border-border-strong',
       ]"
     />
     <p v-if="error" :id="`${id}-err`" class="mt-1 text-sm text-danger">{{ error }}</p>

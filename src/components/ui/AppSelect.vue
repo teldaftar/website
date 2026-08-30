@@ -16,7 +16,7 @@ const id = useId()
 
 <template>
   <div class="w-full">
-    <label v-if="label" :for="id" class="mb-1.5 block text-sm font-medium text-fg-muted">
+    <label v-if="label" :for="id" class="eyebrow mb-2 block">
       {{ label }}
     </label>
     <div class="relative">
@@ -26,9 +26,9 @@ const id = useId()
         :disabled="disabled"
         :aria-invalid="!!error"
         :class="[
-          'h-11 w-full appearance-none rounded-xl border bg-surface pl-3.5 pr-10 text-[15px] text-fg outline-none',
-          'transition-colors focus:border-primary focus:ring-2 focus:ring-primary/25 disabled:opacity-60',
-          error ? 'border-danger' : 'border-border',
+          'h-11 w-full appearance-none rounded-lg border bg-surface pl-3.5 pr-10 text-[15px] text-fg outline-none',
+          'transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60',
+          error ? 'border-danger' : 'border-border-strong',
         ]"
       >
         <option v-if="placeholder" :value="undefined" disabled>{{ placeholder }}</option>

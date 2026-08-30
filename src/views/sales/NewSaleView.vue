@@ -20,6 +20,7 @@ import { useCreateSale } from '@/composables/useSales'
 import { createDebtState, validateDebt, buildDebt } from '@/composables/useSaleDebt'
 import { normalizeError, mapErrorCode, toUserMessage } from '@/api/errors'
 import { formatMoney, formatCost, formatMemory, normalizePhone, resolveImageUrl } from '@/lib/format'
+import { newIdempotencyKey } from '@/lib/idempotency'
 import { notify } from '@/lib/toast'
 import { t } from '@/i18n'
 import PageHeader from '@/components/shell/PageHeader.vue'
@@ -56,6 +57,10 @@ const debt = createDebtState()
 const errors = reactive<Record<string, string>>({})
 const submitting = ref(false)
 const done = ref<Sale | null>(null)
+
+// One idempotency key per checkout intent — reused on every retry so a lost
+// response never creates two sales. Reset in `reset()` for the next checkout.
+const checkoutKey = ref(newIdempotencyKey())
 
 const showPhonePicker = ref(false)
 const showAccessoryPicker = ref(false)
@@ -137,6 +142,7 @@ async function doSubmit() {
       items: cart.toPayloadItems(),
       note: note.value.trim() || undefined,
       debt: buildDebt(debt),
+      idempotencyKey: checkoutKey.value,
       ...customer,
     })
     done.value = sale
@@ -158,6 +164,8 @@ function handleError(err: unknown) {
 
 function reset() {
   done.value = null
+  // New checkout intent → new idempotency key.
+  checkoutKey.value = newIdempotencyKey()
   cart.clear()
   note.value = ''
   customerName.value = ''

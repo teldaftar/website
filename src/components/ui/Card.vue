@@ -12,10 +12,10 @@ withDefaults(
 <template>
   <div
     :class="[
-      'rounded-2xl border border-border bg-surface shadow-sm shadow-black/[.03]',
+      'rounded-2xl border border-border bg-surface shadow-card',
       padded ? 'p-4' : '',
       interactive
-        ? 'cursor-pointer transition-[transform,box-shadow] duration-150 ease-out hover:shadow-md active:scale-[.99]'
+        ? 'cursor-pointer transition-[transform,border-color,box-shadow] duration-150 ease-out hover:border-border-strong hover:shadow-pop active:scale-[.99]'
         : '',
     ]"
   >

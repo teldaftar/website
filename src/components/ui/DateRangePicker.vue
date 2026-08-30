@@ -49,11 +49,11 @@ const presets: { key: Preset; label: string }[] = [
         v-for="p in presets"
         :key="p.key"
         type="button"
-        class="rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors"
+        class="rounded-lg border px-3.5 py-1.5 text-sm font-semibold transition-colors"
         :class="
           active === p.key
-            ? 'border-primary bg-primary text-primary-fg'
-            : 'border-border bg-surface text-fg-muted hover:text-fg'
+            ? 'border-primary bg-primary text-primary-fg shadow-card'
+            : 'border-border-strong bg-surface text-fg-muted hover:text-fg'
         "
         @click="apply(p.key)"
       >

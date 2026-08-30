@@ -28,17 +28,16 @@ const props = withDefaults(
 )
 
 const variants: Record<Variant, string> = {
-  primary:
-    'bg-primary text-primary-fg hover:bg-primary-hover active:scale-[.98] shadow-sm shadow-primary/20',
-  secondary: 'bg-surface-2 text-fg hover:bg-border/60 active:scale-[.98] border border-border',
-  ghost: 'bg-transparent text-fg hover:bg-surface-2 active:scale-[.98]',
-  danger: 'bg-danger text-white hover:brightness-110 active:scale-[.98] shadow-sm shadow-danger/20',
+  primary: 'bg-primary text-primary-fg hover:bg-primary-hover active:scale-[.985] shadow-card',
+  secondary: 'bg-surface text-fg border border-border-strong hover:bg-surface-2 active:scale-[.985]',
+  ghost: 'bg-transparent text-fg-muted hover:bg-surface-2 hover:text-fg active:scale-[.985]',
+  danger: 'bg-danger text-white hover:brightness-110 active:scale-[.985] shadow-card',
 }
 
 const sizes: Record<Size, string> = {
   sm: 'h-9 text-sm gap-1.5 rounded-lg',
-  md: 'h-11 text-[15px] gap-2 rounded-xl',
-  lg: 'h-13 text-base gap-2 rounded-xl',
+  md: 'h-11 text-[15px] gap-2 rounded-lg',
+  lg: 'h-12 text-[15px] gap-2 rounded-xl',
 }
 
 const padding = computed(() => {
@@ -47,7 +46,7 @@ const padding = computed(() => {
 })
 
 const classes = computed(() => [
-  'inline-flex items-center justify-center font-medium select-none',
+  'inline-flex items-center justify-center font-semibold tracking-[-0.01em] select-none',
   'transition-[background-color,transform,filter] duration-150 ease-out',
   'disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-2 focus-visible:outline-ring',
   variants[props.variant],

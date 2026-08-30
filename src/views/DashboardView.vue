@@ -12,7 +12,6 @@ import {
   ChevronRight,
   AlertTriangle,
   HandCoins,
-  ShoppingCart,
 } from 'lucide-vue-next'
 import { useStatisticsSummary, useDailyStats } from '@/composables/useStatistics'
 import { toUserMessage } from '@/api/errors'
@@ -27,7 +26,6 @@ import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
 import StatTile from '@/components/ui/StatTile.vue'
 import Card from '@/components/ui/Card.vue'
 import StatChart from '@/components/dashboard/StatChart.vue'
-import AppButton from '@/components/ui/AppButton.vue'
 
 const router = useRouter()
 const range = ref<DateRange>(currentMonthRange())
@@ -47,11 +45,6 @@ function refresh() {
   <div>
     <PageHeader :title="t('dashboard.title')" />
     <PageContainer wide>
-      <AppButton size="lg" block class="mb-4" @click="router.push({ name: 'sale-new' })">
-        <template #icon><ShoppingCart class="size-5" /></template>
-        {{ t('sales.title') }}
-      </AppButton>
-
       <div class="mb-4">
         <DateRangePicker v-model="range" />
       </div>
@@ -75,7 +68,7 @@ function refresh() {
 
           <div v-if="s" class="space-y-5">
             <!-- Headline totals -->
-            <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <StatTile
                 :label="t('dashboard.grossProfit')"
                 :value="s.totals.grossProfit"
@@ -103,7 +96,7 @@ function refresh() {
             </div>
 
             <!-- Per-category profit -->
-            <div class="grid grid-cols-2 gap-3 lg:grid-cols-3">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <StatTile
                 :label="t('dashboard.phonesProfit')"
                 :value="s.phones.profit"

@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Store, LogOut } from 'lucide-vue-next'
-import { sidebarItems } from '@/config/nav'
+import { sidebarItems, newSaleItem } from '@/config/nav'
 import { useAuthStore } from '@/stores/auth'
 import { t } from '@/i18n'
 
@@ -33,7 +33,7 @@ async function onLogout() {
   >
     <!-- Shop identity -->
     <div class="flex items-center gap-3 px-5 py-5">
-      <div class="grid size-10 place-items-center rounded-xl bg-primary text-primary-fg">
+      <div class="grid size-10 place-items-center rounded-lg bg-primary text-primary-fg">
         <Store class="size-5" />
       </div>
       <div class="min-w-0">
@@ -42,11 +42,22 @@ async function onLogout() {
       </div>
     </div>
 
-    <nav class="flex-1 space-y-1 overflow-y-auto px-3">
+    <!-- Primary action: New sale -->
+    <div class="px-3 pb-2">
+      <button
+        class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-3 text-[15px] font-semibold text-primary-fg shadow-card transition-[background-color,transform] hover:bg-primary-hover active:scale-[.985]"
+        @click="router.push({ name: newSaleItem.name })"
+      >
+        <component :is="newSaleItem.icon" class="size-5" />
+        <span>{{ newSaleItem.label }}</span>
+      </button>
+    </div>
+
+    <nav class="flex-1 space-y-0.5 overflow-y-auto px-3 pt-2">
       <button
         v-for="item in sidebarItems"
         :key="item.name"
-        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors"
+        class="relative flex w-full items-center gap-3 rounded-lg py-2.5 pr-3 pl-4 text-[15px] font-medium transition-colors"
         :class="
           isActive(item.name)
             ? 'bg-primary-soft text-primary'
@@ -54,6 +65,10 @@ async function onLogout() {
         "
         @click="router.push({ name: item.name })"
       >
+        <span
+          v-if="isActive(item.name)"
+          class="absolute inset-y-1.5 left-0 w-1 rounded-full bg-primary"
+        />
         <component :is="item.icon" class="size-5 shrink-0" />
         <span>{{ item.label }}</span>
       </button>
@@ -61,7 +76,7 @@ async function onLogout() {
 
     <div class="border-t border-border p-3">
       <button
-        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium text-fg-muted transition-colors hover:bg-danger-soft hover:text-danger"
+        class="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-[15px] font-medium text-fg-muted transition-colors hover:bg-danger-soft hover:text-danger"
         @click="onLogout"
       >
         <LogOut class="size-5" />

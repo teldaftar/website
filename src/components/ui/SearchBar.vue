@@ -34,7 +34,7 @@ function clear() {
       type="search"
       inputmode="search"
       :placeholder="placeholder ?? t('app.search')"
-      class="h-11 w-full rounded-xl border border-border bg-surface pr-10 pl-11 text-[15px] text-fg outline-none transition-colors placeholder:text-fg-muted/60 focus:border-primary focus:ring-2 focus:ring-primary/25"
+      class="h-11 w-full rounded-lg border border-border-strong bg-surface pr-10 pl-11 text-[15px] text-fg outline-none transition-colors placeholder:text-fg-muted/60 focus:border-primary focus:ring-2 focus:ring-primary/20"
     />
     <button
       v-if="local"

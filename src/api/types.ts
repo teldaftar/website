@@ -164,9 +164,12 @@ export interface CreatePhonePayload {
   supplierName?: string | null
   supplierSurname?: string | null
   supplierPhone?: string | null
+  /** UUID v4 that makes this create retry-safe (no duplicate on re-submit). */
+  idempotencyKey?: string
 }
 
-export type UpdatePhonePayload = Partial<CreatePhonePayload>
+// Edit never carries an idempotency key (PATCH is already keyed by phone id).
+export type UpdatePhonePayload = Partial<Omit<CreatePhonePayload, 'idempotencyKey'>>
 
 /** Response of `GET /phones/:id/label` — data only, layout is client-side. */
 export interface PhoneLabel {
@@ -517,6 +520,8 @@ export interface CreateSalePayload {
   customerName?: string
   customerPhone?: string
   debt?: DebtInput
+  /** UUID v4 that makes this checkout retry-safe (no duplicate sale on re-submit). */
+  idempotencyKey?: string
 }
 
 export interface UpdateSaleItemInput {
@@ -641,6 +646,52 @@ export interface CreateExpensePayload {
 }
 
 export type UpdateExpensePayload = Partial<CreateExpensePayload>
+
+/* ----------------------------------------------------------------------------
+ * Creditors (Haqdorlar — people the shop owes money to)
+ *
+ * A simple CRUD ledger, structurally like expenses: who the money is from, how
+ * much, when it was borrowed and when it's due. Dates are calendar dates
+ * (YYYY-MM-DD), no time/timezone. "Overdue" is a pure frontend concept
+ * (dueDate < today) — the backend keeps no overdue flag.
+ * ------------------------------------------------------------------------- */
+
+export interface Creditor {
+  id: string
+  amount: number
+  /** Who the money is from ("kimdan"). */
+  creditorName: string
+  phone?: string | null
+  note?: string | null
+  /** When the money was borrowed (YYYY-MM-DD). */
+  borrowedAt: string
+  /** When it's due to be repaid (YYYY-MM-DD). */
+  dueDate: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreditorListQuery {
+  /** Matches creditor name, phone or note. */
+  search?: string
+  /** Range filter on `borrowedAt`. */
+  from?: string
+  to?: string
+  page?: number
+  limit?: number
+}
+
+export interface CreateCreditorPayload {
+  amount: number
+  creditorName: string
+  dueDate: string
+  /** Omit → backend defaults to today (Asia/Tashkent). */
+  borrowedAt?: string
+  phone?: string | null
+  note?: string | null
+}
+
+export type UpdateCreditorPayload = Partial<CreateCreditorPayload>
 
 /* ----------------------------------------------------------------------------
  * Statistics

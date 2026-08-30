@@ -40,7 +40,7 @@ function onInput(e: Event) {
 
 <template>
   <div class="w-full">
-    <label v-if="label" :for="id" class="mb-1.5 block text-sm font-medium text-fg-muted">
+    <label v-if="label" :for="id" class="eyebrow mb-2 block">
       {{ label }}
     </label>
     <div class="relative flex items-center">
@@ -52,8 +52,8 @@ function onInput(e: Event) {
         :placeholder="placeholder ?? '0'"
         :disabled="disabled"
         :aria-invalid="!!error"
-        class="h-11 w-full rounded-xl border bg-surface pr-14 pl-3.5 text-[15px] font-medium text-fg tabular-nums outline-none transition-colors placeholder:text-fg-muted/60 focus:border-primary focus:ring-2 focus:ring-primary/25 disabled:opacity-60"
-        :class="error ? 'border-danger focus:ring-danger/25' : 'border-border'"
+        class="h-11 w-full rounded-lg border bg-surface pr-14 pl-3.5 text-[15px] font-semibold text-fg tabular-nums outline-none transition-colors placeholder:text-fg-muted/60 focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
+        :class="error ? 'border-danger focus:ring-danger/20' : 'border-border-strong'"
         @input="onInput"
       />
       <span class="pointer-events-none absolute right-3.5 text-sm text-fg-muted">so'm</span>

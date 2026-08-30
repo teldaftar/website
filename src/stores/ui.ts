@@ -26,7 +26,7 @@ export const useUiStore = defineStore('ui', () => {
     document.documentElement.classList.toggle('dark', isDark())
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', isDark() ? '#0b1020' : '#4f46e5')
+      ?.setAttribute('content', isDark() ? '#14130f' : '#047857')
   }
 
   function setTheme(next: ThemePref) {

@@ -25,7 +25,7 @@ function onInput(e: Event) {
 
 <template>
   <div class="w-full">
-    <span v-if="label" class="mb-1.5 block text-sm font-medium text-fg-muted">{{ label }}</span>
+    <span v-if="label" class="eyebrow mb-2 block">{{ label }}</span>
     <div class="flex items-center gap-2">
       <button
         type="button"

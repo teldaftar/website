@@ -20,30 +20,36 @@ const props = withDefaults(
 
 const display = useCountUp(toRef(props, 'value'))
 
+// The left accent bar + icon tint give each tile its identity.
+const barTone: Record<Tone, string> = {
+  neutral: 'bg-border-strong',
+  primary: 'bg-primary',
+  success: 'bg-success',
+  danger: 'bg-danger',
+  warning: 'bg-warning',
+  info: 'bg-info',
+}
+
 const iconTone: Record<Tone, string> = {
-  neutral: 'bg-surface-2 text-fg-muted',
-  primary: 'bg-primary-soft text-primary',
-  success: 'bg-success-soft text-success',
-  danger: 'bg-danger-soft text-danger',
-  warning: 'bg-warning-soft text-warning',
-  info: 'bg-info-soft text-info',
+  neutral: 'text-fg-muted',
+  primary: 'text-primary',
+  success: 'text-success',
+  danger: 'text-danger',
+  warning: 'text-warning',
+  info: 'text-info',
 }
 </script>
 
 <template>
-  <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm shadow-black/[.03]">
+  <div class="relative overflow-hidden rounded-2xl border border-border bg-surface p-4 pl-5 shadow-card">
+    <span class="absolute inset-y-0 left-0 w-1.5" :class="barTone[tone]" />
     <div class="flex items-start justify-between gap-2">
-      <span class="text-sm text-fg-muted">{{ label }}</span>
-      <span
-        v-if="icon"
-        :class="['grid size-8 shrink-0 place-items-center rounded-lg', iconTone[tone]]"
-      >
-        <component :is="icon" class="size-4" />
-      </span>
+      <span class="eyebrow">{{ label }}</span>
+      <component :is="icon" v-if="icon" :class="['size-4 shrink-0', iconTone[tone]]" />
     </div>
-    <div class="mt-2 text-xl font-bold tracking-tight text-fg tnum">
+    <div class="mt-2.5 text-2xl leading-none font-bold tracking-tight text-fg tnum">
       {{ format === 'money' ? formatMoney(display) : formatNumber(display) }}
     </div>
-    <p v-if="hint" class="mt-0.5 text-xs text-fg-muted">{{ hint }}</p>
+    <p v-if="hint" class="mt-1.5 text-xs text-fg-muted">{{ hint }}</p>
   </div>
 </template>
