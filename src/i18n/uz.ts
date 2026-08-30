@@ -224,6 +224,8 @@ export const uz = {
     emptyText: 'Birinchi kirimingizni qo‘shing.',
     quantityInStock: '{n} dona mavjud',
     noResults: 'Aksessuar topilmadi',
+    yesterday: 'Kecha',
+    dayReceipts: '{n} ta kirim',
   },
 
   sales: {

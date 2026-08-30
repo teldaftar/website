@@ -78,6 +78,17 @@ export function todayISO(): string {
   return formatInTimeZone(new Date(), APP_TZ, 'yyyy-MM-dd')
 }
 
+/**
+ * The calendar day (in Asia/Tashkent) an instant falls on, as `yyyy-MM-dd`.
+ * Stable key for grouping a list by day. Empty string for invalid input.
+ */
+export function dayKey(input: string | number | Date | null | undefined): string {
+  if (input == null) return ''
+  const d = toDate(input)
+  if (!d) return ''
+  return formatInTimeZone(d, APP_TZ, 'yyyy-MM-dd')
+}
+
 /** Current calendar month range (Asia/Tashkent) as `{ from, to }` ISO dates. */
 export function currentMonthRange(): { from: string; to: string } {
   const today = parseISO(todayISO())

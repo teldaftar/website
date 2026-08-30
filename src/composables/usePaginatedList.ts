@@ -1,5 +1,5 @@
 import { computed, type MaybeRefOrGetter, toValue } from 'vue'
-import { useInfiniteQuery, type InfiniteData } from '@tanstack/vue-query'
+import { useInfiniteQuery, keepPreviousData, type InfiniteData } from '@tanstack/vue-query'
 import type { Paginated } from '@/api/types'
 
 interface PageQuery {
@@ -29,6 +29,9 @@ export function usePaginatedList<T, F extends PageQuery>(
     queryKey: [key, filters],
     initialPageParam: 1,
     queryFn: ({ pageParam }) => fetcher({ ...toValue(filters), page: pageParam, limit } as F),
+    // Keep the previous results on screen while a filter/search change refetches,
+    // so the list doesn't blank out to a skeleton on every keystroke or range tweak.
+    placeholderData: keepPreviousData,
     getNextPageParam: (lastPage) =>
       lastPage.meta.page < lastPage.meta.totalPages ? lastPage.meta.page + 1 : undefined,
   })

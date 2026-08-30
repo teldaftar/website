@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PackagePlus, Boxes, Layers, Truck } from 'lucide-vue-next'
 import type { StockReceiptRow } from '@/api/types'
-import { formatMoney, formatNumber, formatDate, formatTime } from '@/lib/format'
+import { formatMoney, formatNumber, formatTime } from '@/lib/format'
 import { t } from '@/i18n'
 import Card from '@/components/ui/Card.vue'
 
@@ -17,13 +17,11 @@ defineEmits<{ open: [] }>()
 
     <div class="min-w-0 flex-1">
       <div class="flex items-start justify-between gap-2">
-        <p class="truncate text-base font-bold text-fg tnum">{{ formatDate(row.receivedAt) }}</p>
+        <p class="truncate text-base font-bold text-fg tnum">{{ formatTime(row.receivedAt) }}</p>
         <p class="shrink-0 font-bold text-fg tnum">{{ formatMoney(row.totalAmount) }}</p>
       </div>
 
-      <p class="mt-0.5 text-xs text-fg-muted tnum">
-        {{ formatTime(row.receivedAt) }} · {{ row.code }}
-      </p>
+      <p class="mt-0.5 text-xs text-fg-muted tnum">{{ row.code }}</p>
 
       <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-fg-muted">
         <span class="inline-flex items-center gap-1">
