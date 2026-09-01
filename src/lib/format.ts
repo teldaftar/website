@@ -1,5 +1,6 @@
-import { format, isValid, parseISO, startOfMonth, endOfMonth } from 'date-fns'
+import { format, isValid, parseISO, startOfMonth, endOfMonth, subDays } from 'date-fns'
 import { formatInTimeZone } from 'date-fns-tz'
+import { t } from '@/i18n'
 
 /** The shop operates in a single timezone; the backend interprets ranges here. */
 export const APP_TZ = 'Asia/Tashkent'
@@ -87,6 +88,54 @@ export function dayKey(input: string | number | Date | null | undefined): string
   const d = toDate(input)
   if (!d) return ''
   return formatInTimeZone(d, APP_TZ, 'yyyy-MM-dd')
+}
+
+/**
+ * Human label for a `yyyy-MM-dd` day key: "Bugun" / "Kecha" for today &
+ * yesterday (Asia/Tashkent), otherwise a formatted date ("01.09.2026").
+ */
+export function dayLabel(key: string): string {
+  if (!key) return '—'
+  const today = todayISO()
+  if (key === today) return t('app.today')
+  if (key === format(subDays(parseISO(today), 1), 'yyyy-MM-dd')) return t('app.yesterday')
+  return formatDate(key)
+}
+
+/** One day-bucket of a list grouped by calendar day (Asia/Tashkent). */
+export interface DayGroup<T> {
+  /** `yyyy-MM-dd` key. */
+  key: string
+  /** Display label ("Bugun" / "Kecha" / "01.09.2026"). */
+  label: string
+  items: T[]
+}
+
+/**
+ * Group a list into calendar-day buckets (Asia/Tashkent) using `getDate` to
+ * pull the instant from each item. Groups are ordered newest-day-first by
+ * default; pass `order: 'ASC'` for oldest-first. Item order within a group is
+ * preserved from the input, so the caller's sort still holds inside each day.
+ */
+export function groupByDay<T>(
+  items: readonly T[],
+  getDate: (item: T) => string | number | Date | null | undefined,
+  order: 'ASC' | 'DESC' = 'DESC',
+): DayGroup<T>[] {
+  const map = new Map<string, T[]>()
+  for (const item of items) {
+    const key = dayKey(getDate(item))
+    const bucket = map.get(key)
+    if (bucket) bucket.push(item)
+    else map.set(key, [item])
+  }
+  const groups = Array.from(map, ([key, groupItems]) => ({
+    key,
+    label: dayLabel(key),
+    items: groupItems,
+  }))
+  groups.sort((a, b) => (order === 'ASC' ? a.key.localeCompare(b.key) : b.key.localeCompare(a.key)))
+  return groups
 }
 
 /** Current calendar month range (Asia/Tashkent) as `{ from, to }` ISO dates. */

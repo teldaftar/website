@@ -127,6 +127,8 @@ export interface Phone {
   status: PhoneStatus
   /** Present when the phone was sold on debt (null for a cash sale). */
   debt?: EmbeddedDebt | null
+  /** When the phone was last sold (ISO date-time); null while IN_STOCK. */
+  soldAt?: string | null
   createdAt: string
   updatedAt: string
 }
@@ -135,11 +137,15 @@ export interface PhoneListQuery {
   status?: PhoneStatus
   condition?: PhoneCondition
   search?: string
+  /** Range filter on `createdAt` (added date). A single day = from === to. */
   from?: string
   to?: string
+  /** Range filter on `soldAt` (sold date) — send with status=SOLD. Single day = soldFrom === soldTo. */
+  soldFrom?: string
+  soldTo?: string
   page?: number
   limit?: number
-  sort?: 'createdAt' | 'name' | 'purchasePrice'
+  sort?: 'createdAt' | 'name' | 'purchasePrice' | 'soldAt'
   order?: SortOrder
 }
 

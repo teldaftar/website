@@ -46,3 +46,6 @@ playwright-report/
 # Local scratch screenshots
 img.png
 img_*.png
+
+# Personal Claude Code permissions (broad local auto-approvals)
+.claude/settings.local.json

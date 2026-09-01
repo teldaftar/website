@@ -7,18 +7,21 @@ import { usePhonesList, useDeletePhone } from '@/composables/usePhones'
 import { usePhoneSaleLookup } from '@/composables/useSales'
 import { toUserMessage } from '@/api/errors'
 import { notify } from '@/lib/toast'
+import { groupByDay, todayISO } from '@/lib/format'
 import { t } from '@/i18n'
 import PageHeader from '@/components/shell/PageHeader.vue'
 import PageContainer from '@/components/shell/PageContainer.vue'
 import SearchBar from '@/components/ui/SearchBar.vue'
 import Segmented from '@/components/ui/Segmented.vue'
 import AppSelect from '@/components/ui/AppSelect.vue'
+import AppDateInput from '@/components/ui/AppDateInput.vue'
 import DataState from '@/components/ui/DataState.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
 import InfiniteSentinel from '@/components/ui/InfiniteSentinel.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
+import DateGroupHeader from '@/components/ui/DateGroupHeader.vue'
 import PhoneCard from '@/components/phones/PhoneCard.vue'
 import PhoneFormSheet from '@/components/phones/PhoneFormSheet.vue'
 
@@ -31,21 +34,43 @@ const filters = reactive<{
   condition: PhoneCondition | undefined
   sort: 'createdAt' | 'name' | 'purchasePrice'
   order: SortOrder
+  // Optional single-day filter (yyyy-MM-dd, '' = all days). Filters createdAt
+  // on the in-stock tab and soldAt on the sold tab.
+  day: string
 }>({
   search: '',
   status: 'IN_STOCK',
   condition: undefined,
   sort: 'createdAt',
   order: 'DESC',
+  day: '',
 })
 
-const query = computed<PhoneListQuery>(() => ({
-  search: filters.search.trim() || undefined,
-  status: filters.status,
-  condition: filters.condition,
-  sort: filters.sort,
-  order: filters.order,
-}))
+// On the sold tab, "Sana" (the createdAt sort) becomes a sort by sold date.
+const effectiveSort = computed(() =>
+  filters.status === 'SOLD' && filters.sort === 'createdAt' ? 'soldAt' : filters.sort,
+)
+
+const query = computed<PhoneListQuery>(() => {
+  const q: PhoneListQuery = {
+    search: filters.search.trim() || undefined,
+    status: filters.status,
+    condition: filters.condition,
+    sort: effectiveSort.value,
+    order: filters.order,
+  }
+  // A picked day filters by sold date on the sold tab, by added date otherwise.
+  if (filters.day) {
+    if (filters.status === 'SOLD') {
+      q.soldFrom = filters.day
+      q.soldTo = filters.day
+    } else {
+      q.from = filters.day
+      q.to = filters.day
+    }
+  }
+  return q
+})
 
 const {
   items,
@@ -59,6 +84,17 @@ const {
   isFetchingNextPage,
 } = usePhonesList(query)
 
+// Phones are grouped by day: added date (createdAt) on the in-stock tab, sold
+// date (soldAt) on the sold tab — so each header reads "qachon qo'shilgan" /
+// "qachon sotilgan".
+const dayGroups = computed(() =>
+  groupByDay(
+    items.value,
+    (phone) => (filters.status === 'SOLD' ? phone.soldAt : phone.createdAt),
+    filters.order,
+  ),
+)
+
 const statusOptions = [
   { label: t('phones.inStock'), value: 'IN_STOCK' as const },
   { label: t('phones.sold'), value: 'SOLD' as const },
@@ -68,11 +104,15 @@ const statusOptions = [
 //   { label: t('phones.conditionNew'), value: 'NEW' as const },
 //   { label: t('phones.conditionUsed'), value: 'USED' as const },
 // ]
-const sortOptions = [
-  { label: t('phones.sortCreatedAt'), value: 'createdAt' as const },
+// "Sana" sorts by added date in stock, by sold date once sold.
+const sortOptions = computed(() => [
+  {
+    label: filters.status === 'SOLD' ? t('phones.sortSoldAt') : t('phones.sortCreatedAt'),
+    value: 'createdAt' as const,
+  },
   { label: t('phones.sortName'), value: 'name' as const },
   { label: t('phones.sortPrice'), value: 'purchasePrice' as const },
-]
+])
 
 function toggleOrder() {
   filters.order = filters.order === 'DESC' ? 'ASC' : 'DESC'
@@ -154,6 +194,22 @@ async function confirmDelete() {
             <ArrowDownUp class="size-5" :class="filters.order === 'ASC' ? 'rotate-180' : ''" />
           </button>
         </div>
+
+        <!-- Single-day filter: created date in stock, sold date once sold. -->
+        <div>
+          <div class="mb-1.5 flex items-center justify-between">
+            <span class="eyebrow">{{ t('phones.filterDay') }}</span>
+            <button
+              v-if="filters.day"
+              type="button"
+              class="text-xs font-medium text-primary"
+              @click="filters.day = ''"
+            >
+              {{ t('phones.filterDayClear') }}
+            </button>
+          </div>
+          <AppDateInput v-model="filters.day" :max="todayISO()" />
+        </div>
       </div>
 
       <DataState
@@ -182,19 +238,29 @@ async function confirmDelete() {
           </EmptyState>
         </template>
 
-        <TransitionGroup tag="div" name="list" class="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <PhoneCard
-            v-for="phone in items"
-            :key="phone.id"
-            :phone="phone"
-            @open="router.push({ name: 'phone-detail', params: { id: phone.id } })"
-            @sell="sell(phone)"
-            @edit="edit(phone)"
-            @label="router.push({ name: 'phone-label', params: { id: phone.id } })"
-            @remove="askDelete(phone)"
-            @edit-price="editSalePrice(phone)"
-          />
-        </TransitionGroup>
+        <!-- Grouped by day: added date in stock, sold date once sold. -->
+        <div class="space-y-4">
+          <section v-for="group in dayGroups" :key="group.key">
+            <DateGroupHeader :label="group.label" :count="group.items.length" />
+            <TransitionGroup
+              tag="div"
+              name="list"
+              class="mt-2 grid grid-cols-1 gap-3 lg:grid-cols-2"
+            >
+              <PhoneCard
+                v-for="phone in group.items"
+                :key="phone.id"
+                :phone="phone"
+                @open="router.push({ name: 'phone-detail', params: { id: phone.id } })"
+                @sell="sell(phone)"
+                @edit="edit(phone)"
+                @label="router.push({ name: 'phone-label', params: { id: phone.id } })"
+                @remove="askDelete(phone)"
+                @edit-price="editSalePrice(phone)"
+              />
+            </TransitionGroup>
+          </section>
+        </div>
 
         <InfiniteSentinel
           :disabled="!hasNextPage"

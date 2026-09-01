@@ -26,6 +26,7 @@ export const uz = {
     optional: 'ixtiyoriy',
     required: 'majburiy',
     today: 'Bugun',
+    yesterday: 'Kecha',
     createdAt: "Qo'shilgan",
     somSuffix: "so'm",
     print: 'Chop etish',
@@ -126,8 +127,12 @@ export const uz = {
     emptyTitle: 'Telefonlar yo‘q',
     emptyText: 'Birinchi telefoningizni qo‘shing.',
     sortCreatedAt: 'Sana',
+    sortSoldAt: 'Sotilgan sana',
     sortName: 'Nom',
     sortPrice: 'Narx',
+    filterDay: 'Sana bo‘yicha',
+    filterDayAll: 'Barcha sanalar',
+    filterDayClear: 'Sanani tozalash',
   },
 
   accessories: {
