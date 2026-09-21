@@ -12,6 +12,7 @@ import {
   ChevronRight,
   AlertTriangle,
   HandCoins,
+  Download,
 } from 'lucide-vue-next'
 import { useStatisticsSummary, useDailyStats } from '@/composables/useStatistics'
 import { toUserMessage } from '@/api/errors'
@@ -25,10 +26,13 @@ import DataState from '@/components/ui/DataState.vue'
 import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
 import StatTile from '@/components/ui/StatTile.vue'
 import Card from '@/components/ui/Card.vue'
+import AppButton from '@/components/ui/AppButton.vue'
 import StatChart from '@/components/dashboard/StatChart.vue'
+import ExportSheet from '@/components/dashboard/ExportSheet.vue'
 
 const router = useRouter()
 const range = ref<DateRange>(currentMonthRange())
+const exportOpen = ref(false)
 const rangeQuery = computed(() => ({ from: range.value.from, to: range.value.to }))
 
 const summaryQ = useStatisticsSummary(rangeQuery)
@@ -43,7 +47,14 @@ function refresh() {
 
 <template>
   <div>
-    <PageHeader :title="t('dashboard.title')" />
+    <PageHeader :title="t('dashboard.title')">
+      <template #actions>
+        <AppButton size="sm" variant="secondary" @click="exportOpen = true">
+          <template #icon><Download class="size-4" /></template>
+          {{ t('export.button') }}
+        </AppButton>
+      </template>
+    </PageHeader>
     <PageContainer wide>
       <div class="mb-4">
         <DateRangePicker v-model="range" />
@@ -183,7 +194,9 @@ function refresh() {
                   </span>
                 </div>
                 <div class="mt-3 flex items-center gap-3 rounded-xl bg-success-soft p-3">
-                  <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-success/15 text-success">
+                  <span
+                    class="grid size-9 shrink-0 place-items-center rounded-lg bg-success/15 text-success"
+                  >
                     <HandCoins class="size-5" />
                   </span>
                   <div>
@@ -237,5 +250,7 @@ function refresh() {
         </DataState>
       </PullToRefresh>
     </PageContainer>
+
+    <ExportSheet v-model="exportOpen" />
   </div>
 </template>

@@ -240,7 +240,10 @@ export interface CreateAccessoryPayload {
 }
 
 export type UpdateAccessoryPayload = Partial<
-  Pick<CreateAccessoryPayload, 'name' | 'imei' | 'purchasePrice' | 'salePrice' | 'note' | 'imageUrl'>
+  Pick<
+    CreateAccessoryPayload,
+    'name' | 'imei' | 'purchasePrice' | 'salePrice' | 'note' | 'imageUrl'
+  >
 >
 
 export interface StockEntry {
@@ -778,6 +781,13 @@ export interface DailyStat {
 export interface StatRangeQuery {
   from?: string
   to?: string
+}
+
+/** Which slice of the shop an Excel report covers. */
+export type StatExportScope = 'ALL' | 'PHONE' | 'ACCESSORY' | 'KEYPAD_PHONE'
+
+export interface StatExportQuery extends StatRangeQuery {
+  scope?: StatExportScope
 }
 
 /* ----------------------------------------------------------------------------
