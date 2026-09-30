@@ -703,6 +703,54 @@ export interface CreateCreditorPayload {
 export type UpdateCreditorPayload = Partial<CreateCreditorPayload>
 
 /* ----------------------------------------------------------------------------
+ * Debt book (Qarz daftari — people who owe the shop, kept by hand)
+ *
+ * A standalone manual ledger, NOT linked to sales or their debts. `dueDate` is
+ * a calendar date (YYYY-MM-DD); "overdue" is a frontend concept (dueDate <
+ * today, Asia/Tashkent). The backend rejects unknown body fields (400).
+ * ------------------------------------------------------------------------- */
+
+export interface DebtBookEntry {
+  id: string
+  borrowerName: string
+  phone: string | null
+  amount: number
+  /** When it should be repaid (YYYY-MM-DD). */
+  dueDate: string | null
+  note: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface DebtBookListQuery {
+  /** Matches borrower name, phone or note. */
+  search?: string
+  /** Inclusive range filter on `createdAt`. */
+  from?: string
+  to?: string
+  page?: number
+  /** Max 100. */
+  limit?: number
+}
+
+export interface CreateDebtBookPayload {
+  borrowerName: string
+  amount: number
+  phone?: string
+  dueDate?: string
+  note?: string
+}
+
+/** Same fields, all optional; `null` clears phone / dueDate / note. */
+export interface UpdateDebtBookPayload {
+  borrowerName?: string
+  amount?: number
+  phone?: string | null
+  dueDate?: string | null
+  note?: string | null
+}
+
+/* ----------------------------------------------------------------------------
  * Statistics
  * ------------------------------------------------------------------------- */
 

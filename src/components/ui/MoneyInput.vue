@@ -5,12 +5,14 @@ import { formatNumber } from '@/lib/format'
 withDefaults(
   defineProps<{
     label?: string
+    /** Marks the field as mandatory with a red asterisk after the label. */
+    required?: boolean
     error?: string
     hint?: string
     placeholder?: string
     disabled?: boolean
   }>(),
-  { disabled: false },
+  { disabled: false, required: false },
 )
 
 /** Numeric model in whole so'm; null when empty. */
@@ -41,7 +43,7 @@ function onInput(e: Event) {
 <template>
   <div class="w-full">
     <label v-if="label" :for="id" class="eyebrow mb-2 block">
-      {{ label }}
+      {{ label }}<span v-if="required" class="text-danger" aria-hidden="true"> *</span>
     </label>
     <div class="relative flex items-center">
       <input

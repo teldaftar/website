@@ -187,6 +187,20 @@ export function normalizePhone(input: string | null | undefined): string {
 }
 
 /**
+ * Live "+998 90 123 45 67" mask for a phone input. Takes whatever is in the
+ * field (with or without the +998 prefix) and returns the masked value; an
+ * empty string once no local digits remain, so the field can be cleared.
+ */
+export function maskUzPhone(input: string | null | undefined): string {
+  let digits = (input ?? '').replace(/\D/g, '')
+  if (digits.startsWith('998')) digits = digits.slice(3)
+  digits = digits.slice(0, 9)
+  if (!digits) return ''
+  const parts = [digits.slice(0, 2), digits.slice(2, 5), digits.slice(5, 7), digits.slice(7, 9)]
+  return `+998 ${parts.filter(Boolean).join(' ')}`
+}
+
+/**
  * Memory string like "8 GB / 256 GB". Prefer the backend's pre-formatted
  * `memory` field when present; this mirrors it for create/edit previews.
  */

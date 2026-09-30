@@ -19,6 +19,7 @@ const loaders: Array<() => Promise<unknown>> = [
   () => import('@/views/debts/DebtsView.vue'),
   () => import('@/views/expenses/ExpensesView.vue'),
   () => import('@/views/creditors/CreditorsView.vue'),
+  () => import('@/views/debtBook/DebtBookView.vue'),
   () => import('@/views/settings/SettingsView.vue'),
   () => import('@/views/receipts/NewReceiptView.vue'),
   // Detail screens last.

@@ -8,6 +8,7 @@ import {
   History,
   HandCoins,
   Landmark,
+  NotebookPen,
   Receipt,
   PackagePlus,
   Settings,
@@ -51,6 +52,7 @@ export const sidebarItems: NavItem[] = [
   { name: 'debts', label: t('nav.debts'), icon: HandCoins },
   { name: 'expenses', label: t('nav.expenses'), icon: Receipt },
   { name: 'creditors', label: t('nav.creditors'), icon: Landmark },
+  { name: 'debt-book', label: t('nav.debtBook'), icon: NotebookPen },
   { name: 'settings', label: t('nav.settings'), icon: Settings },
 ]
 
@@ -62,5 +64,6 @@ export const moreItems: NavItem[] = [
   { name: 'debts', label: t('nav.debts'), icon: HandCoins },
   { name: 'expenses', label: t('nav.expenses'), icon: Receipt },
   { name: 'creditors', label: t('nav.creditors'), icon: Landmark },
+  { name: 'debt-book', label: t('nav.debtBook'), icon: NotebookPen },
   { name: 'settings', label: t('nav.settings'), icon: Settings },
 ]

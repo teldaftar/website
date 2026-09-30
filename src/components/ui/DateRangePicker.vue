@@ -10,10 +10,12 @@ export interface DateRange {
   to: string
 }
 
+/** `allowAll` adds a leading "Hammasi" preset (empty from/to = no date filter), selected by default. */
+const props = withDefaults(defineProps<{ allowAll?: boolean }>(), { allowAll: false })
 const model = defineModel<DateRange>({ required: true })
 
-type Preset = 'today' | 'week' | 'month' | 'custom'
-const active = ref<Preset>('month')
+type Preset = 'all' | 'today' | 'week' | 'month' | 'custom'
+const active = ref<Preset>(props.allowAll ? 'all' : 'month')
 
 function fmt(d: Date): string {
   return format(d, 'yyyy-MM-dd')
@@ -22,7 +24,9 @@ function fmt(d: Date): string {
 function apply(preset: Preset) {
   active.value = preset
   const today = parseISO(todayISO())
-  if (preset === 'today') {
+  if (preset === 'all') {
+    model.value = { from: '', to: '' }
+  } else if (preset === 'today') {
     model.value = { from: todayISO(), to: todayISO() }
   } else if (preset === 'week') {
     model.value = {
@@ -35,6 +39,7 @@ function apply(preset: Preset) {
 }
 
 const presets: { key: Preset; label: string }[] = [
+  ...(props.allowAll ? [{ key: 'all' as const, label: t('app.all') }] : []),
   { key: 'today', label: t('dashboard.presetToday') },
   { key: 'week', label: t('dashboard.presetWeek') },
   { key: 'month', label: t('dashboard.presetMonth') },

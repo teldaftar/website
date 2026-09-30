@@ -5,6 +5,8 @@ import { Eye, EyeOff } from 'lucide-vue-next'
 const props = withDefaults(
   defineProps<{
     label?: string
+    /** Marks the field as mandatory with a red asterisk after the label. */
+    required?: boolean
     type?: string
     placeholder?: string
     error?: string
@@ -13,7 +15,7 @@ const props = withDefaults(
     inputmode?: 'text' | 'numeric' | 'decimal' | 'tel' | 'email' | 'search'
     autocomplete?: string
   }>(),
-  { type: 'text', disabled: false },
+  { type: 'text', disabled: false, required: false },
 )
 
 const model = defineModel<string | number>()
@@ -31,7 +33,7 @@ const inputType = computed(() => (isPassword.value && reveal.value ? 'text' : pr
 <template>
   <div class="w-full">
     <label v-if="label" :for="id" class="eyebrow mb-2 block">
-      {{ label }}
+      {{ label }}<span v-if="required" class="text-danger" aria-hidden="true"> *</span>
     </label>
     <div class="relative flex items-center">
       <span v-if="$slots.prefix" class="pointer-events-none absolute left-3 text-fg-muted">
