@@ -9,6 +9,11 @@ import { t } from '@/i18n'
 
 defineProps<{ label?: string }>()
 
+/** Mirrors the backend limits on `POST /uploads/image`. */
+const MAX_SIZE_MB = 3
+const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+
 /** Stores the uploaded image URL (relative path returned by the backend). */
 const model = defineModel<string | null>()
 
@@ -23,6 +28,22 @@ function pick() {
 async function onChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
+  // Check before uploading so the user gets a clear reason instead of a failed request.
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    notify.error(t('upload.wrongType'))
+    if (input.value) input.value.value = ''
+    return
+  }
+  if (file.size > MAX_SIZE_BYTES) {
+    notify.error(
+      t('upload.tooLarge', {
+        maxMb: MAX_SIZE_MB,
+        sizeMb: (file.size / 1024 / 1024).toFixed(1),
+      }),
+    )
+    if (input.value) input.value.value = ''
+    return
+  }
   uploading.value = true
   progress.value = 0
   try {
@@ -45,7 +66,7 @@ function remove() {
   <div class="w-full">
     <span v-if="label" class="eyebrow mb-2 block">{{ label }}</span>
 
-    <input ref="input" type="file" accept="image/*" class="hidden" @change="onChange" />
+    <input ref="input" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" @change="onChange" />
 
     <!-- Preview -->
     <div v-if="model" class="relative w-full overflow-hidden rounded-xl border border-border">

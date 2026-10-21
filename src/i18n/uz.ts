@@ -503,6 +503,8 @@ export const uz = {
     change: 'Rasmni almashtirish',
     remove: 'O‘chirish',
     uploading: 'Yuklanmoqda…',
+    tooLarge: 'Rasm hajmi {maxMb} MB dan kichik bo‘lishi kerak. Tanlangan rasm: {sizeMb} MB',
+    wrongType: 'Faqat JPG, PNG yoki WEBP rasm yuklash mumkin',
   },
 
   errors: {
@@ -536,6 +538,7 @@ export const uz = {
     RETURN_AMOUNT_EXCEEDS_SOLD_DETAIL: 'Qaytarish summasi juda katta. Eng ko‘pi: {maxAmount}',
     RECEIPT_LINE_INVALID:
       "Har bir qatorda aniq bitta narsa bo'lishi kerak: mavjud aksessuar yoki yangi aksessuar",
+    IMAGE_TOO_LARGE: 'Rasm hajmi 3 MB dan kichik bo‘lishi kerak',
     NOT_FOUND: 'Topilmadi',
     VALIDATION_FAILED: 'Ma‘lumot noto‘g‘ri',
     UNAUTHORIZED: 'Sessiya tugadi. Qaytadan kiring.',
