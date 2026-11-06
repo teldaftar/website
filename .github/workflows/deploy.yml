@@ -28,9 +28,9 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # Same-origin API path (backend proxied under /api by the web server).
-          # Override by adding a VITE_API_BASE_URL repository secret/variable.
-          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || '/api' }}
+          # The backend has its own domain; the frontend's nginx does not proxy /api.
+          # Override by adding a VITE_API_BASE_URL repository variable.
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || 'https://api.teldaftar.uz/api' }}
 
       - name: Setup SSH
         run: |
