@@ -24,9 +24,6 @@ export const accessoriesApi = {
   update(id: string, payload: UpdateAccessoryPayload) {
     return api.patch<Accessory>(`/accessories/${id}`, payload).then((r) => r.data)
   },
-  remove(id: string) {
-    return api.delete(`/accessories/${id}`).then((r) => r.data)
-  },
   // `available: true` returns only batches with remaining stock (for the sale picker);
   // omit it for the full intake history on the detail page.
   stockHistory(id: string, params?: { available?: boolean }) {

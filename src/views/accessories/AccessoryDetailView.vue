@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Headphones, Phone, Pencil, Trash2, ShoppingCart } from 'lucide-vue-next'
+import { Headphones, Phone, Pencil, ShoppingCart } from 'lucide-vue-next'
 import type { AccessoryKind } from '@/api/types'
-import { useAccessory, useStockHistory, useDeleteAccessory } from '@/composables/useAccessories'
+import { useAccessory, useStockHistory } from '@/composables/useAccessories'
 import { formatMoney, formatCost, formatNumber, formatDate, resolveImageUrl } from '@/lib/format'
 import { toUserMessage } from '@/api/errors'
-import { notify } from '@/lib/toast'
 import { t } from '@/i18n'
 import PageHeader from '@/components/shell/PageHeader.vue'
 import PageContainer from '@/components/shell/PageContainer.vue'
@@ -15,7 +14,6 @@ import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
 import Card from '@/components/ui/Card.vue'
 import Badge from '@/components/ui/Badge.vue'
 import AppButton from '@/components/ui/AppButton.vue'
-import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import AccessoryFormSheet from '@/components/accessories/AccessoryFormSheet.vue'
 
 const route = useRoute()
@@ -23,37 +21,22 @@ const router = useRouter()
 const id = computed(() => String(route.params.id))
 
 // Same detail view backs accessories and keypad phones; meta.kind picks the
-// icon, page-title fallback and where "back" / delete returns to.
+// icon and page-title fallback. There is deliberately no delete here: stock is
+// owned by receipts, and deleting an item would strand the receipts that hold it.
 const kind = computed<AccessoryKind>(() => (route.meta.kind as AccessoryKind) ?? 'ACCESSORY')
 const isKeypad = computed(() => kind.value === 'KEYPAD_PHONE')
 const detailIcon = computed(() => (isKeypad.value ? Phone : Headphones))
-const listRoute = computed(() => (isKeypad.value ? 'keypad-phones' : 'accessories'))
 const fallbackTitle = computed(() => (isKeypad.value ? t('keypad.title') : t('accessories.title')))
 
 const { data: accessory, isLoading, isError, error, refetch } = useAccessory(id)
 const { data: history } = useStockHistory(id)
-const deleteAccessory = useDeleteAccessory()
 
 const showEdit = ref(false)
-const showDelete = ref(false)
 
 const stockTone = computed(() => {
   const q = accessory.value?.quantity ?? 0
   return q <= 0 ? 'danger' : q <= 3 ? 'warning' : 'neutral'
 })
-
-async function onDelete() {
-  if (!accessory.value) return
-  try {
-    await deleteAccessory.mutateAsync(accessory.value.id)
-    notify.success(t('app.delete'))
-    router.replace({ name: listRoute.value })
-  } catch (err) {
-    notify.error(toUserMessage(err))
-  } finally {
-    showDelete.value = false
-  }
-}
 
 function sell() {
   if (!accessory.value) return
@@ -136,10 +119,6 @@ function sell() {
               <template #icon><Pencil class="size-4" /></template>
               {{ t('app.edit') }}
             </AppButton>
-            <AppButton variant="danger" class="col-span-2" @click="showDelete = true">
-              <template #icon><Trash2 class="size-4" /></template>
-              {{ t('app.delete') }}
-            </AppButton>
           </div>
 
           <!-- Stock history -->
@@ -179,12 +158,5 @@ function sell() {
     </PageContainer>
 
     <AccessoryFormSheet v-if="accessory" v-model="showEdit" :accessory="accessory" />
-    <ConfirmDialog
-      v-model="showDelete"
-      :title="t('accessories.deleteConfirm')"
-      danger
-      :loading="deleteAccessory.isPending.value"
-      @confirm="onDelete"
-    />
   </div>
 </template>

@@ -66,11 +66,3 @@ export function useUpdateAccessory() {
     },
   })
 }
-
-export function useDeleteAccessory() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (id: string) => accessoriesApi.remove(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['accessories'] }),
-  })
-}
